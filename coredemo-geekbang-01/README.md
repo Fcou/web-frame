@@ -1,2 +1,0 @@
-# coredemo
-coredemo for hade
