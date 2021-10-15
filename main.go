@@ -1,7 +1,7 @@
 package main
 
 import (
-	"coredemo/framework"
+	"framework"
 	"net/http"
 )
 
