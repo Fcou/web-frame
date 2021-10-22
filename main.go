@@ -1,16 +1,17 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 	"web-frame/framework"
+	"web-frame/route"
 )
 
 func main() {
+	core := framework.NewCore()
+	route.RegisterRouter(core)
 	server := &http.Server{
-		Handler: framework.NewCore(),
-		Addr:    "localhost:8080",
+		Handler: core,
+		Addr:    ":8888",
 	}
 	server.ListenAndServe()
-	fmt.Println("XXXXXXX")
 }

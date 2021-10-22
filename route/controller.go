@@ -1,11 +1,11 @@
-package main
+package route
 
 import (
 	"context"
-	"web-frame/framework"
 	"fmt"
 	"log"
 	"time"
+	"web-frame/framework"
 )
 
 func FooControllerHandler(c *framework.Context) error {

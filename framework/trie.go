@@ -142,3 +142,12 @@ func (tree *Tree) AddRouter(uri string, handler ControllerHandler) error {
 	}
 	return nil
 }
+
+// 匹配uri
+func (tree *Tree) FindHandler(uri string) ControllerHandler {
+	matchNode := tree.root.matchNode(uri)
+	if matchNode == nil {
+		return nil
+	}
+	return matchNode.handler
+}
