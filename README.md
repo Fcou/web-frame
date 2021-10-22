@@ -1,7 +1,7 @@
 # web-frame
 #### 跟着轩脉刃从 0 开始构建 Web 框架
 ---
-### step_01 分析 net/http，创建 Server 数据结构，自实现Handler接口
+#### 01 分析 net/http，创建 Server 数据结构，自实现Handler接口
 - Web Server 的本质
 ```
 实际上就是接收、解析 HTTP 请求传输的文本字符，理解这些文本字符的指令，然后进行计算，再将返回值组织成 HTTP 响应的文本字符，通过 TCP 网络传输回去。
@@ -18,7 +18,7 @@
 ```
 - 创建 Server 数据结构，并且在数据结构中创建了自定义的 Handler（Core 数据结构）和监听地址，实现了一个 HTTP 服务。
 ---
-### step_02 添加上下文 Context 为请求设置超时时间
+#### 02 添加上下文 Context 为请求设置超时时间
 - 为了防止雪崩，context 标准库的解决思路是：
 **在整个树形逻辑链条中，用上下文控制器 Context，实现每个节点的信息传递和共享。**
 ```
@@ -54,4 +54,24 @@ type cancelCtx struct {
 	err      error                 // set to non-nil by the first cancel call
 }
 ```
+---
+#### 03 实现路由功能，建立url与处理函数的关系（建立与使用）
+- 抽象理解路由功能，就是建立url与处理函数的对应关系，直接想到的是利用map。
+	- Method   Request-URI   HandlerFunction 三个变量的对应关系需要两个map嵌套实现
+	- map[string]map[string]func
+- 为实现**动态路由匹配**，map只能建立1:1的关系，我们需要使用树这种结构来建立n:m的关系
+	- 因为有通配符，在匹配 Request-URI 的时候，请求 URI 的某个字符或者某些字符是动态变化的，无法使用 URI 做为 key 来匹配。
+	- 这个问题本质是一个字符串匹配，而字符串匹配，比较通用的高效方法就是字典树，也叫 trie 树
+- 链式结构：通过函数返回结构本身实现，搞清楚信息输入、输出，按照需求定义即可
+```
+type IGroup interface {
+	// 实现HttpMethod方法
+	Get(string, ControllerHandler)
+	Post(string, ControllerHandler)
+	Put(string, ControllerHandler)
+	Delete(string, ControllerHandler)
 
+	// 实现嵌套group
+	Group(string) IGroup
+}
+```
