@@ -8,7 +8,9 @@ import (
 // type Handler interface {
 //	 ServeHTTP(ResponseWriter, *Request)
 // }
-// 核心Core就是实现Handler接口，也就是实现ServeHttp函数
+// 核心Core
+// 第一步：实现Handler接口，也就是实现ServeHttp函数
+// 第二步：添加路由功能
 type Core struct {
 	router map[string]ControllerHandler
 }

@@ -12,6 +12,9 @@ import (
 	"time"
 )
 
+// Context核心实现链路超时控制
+// 集合了requst,responseWriter
+// 路由控制器
 type Context struct {
 	request        *http.Request
 	responseWriter http.ResponseWriter

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"framework"
+	"web-frame/framework"
 )
 
 func registerRouter(core *framework.Core) {
