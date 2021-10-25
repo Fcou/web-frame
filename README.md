@@ -111,3 +111,4 @@ func Timeout(d time.Duration) framework.ControllerHandler {
 	- node节点上，存储控制器+中间件 数组，是**存储**目的。
 	- context上，存储控制器+中间件 数组，是**调用**目的。
 	- core上，存储控制器+中间件 数组，是**注册**目的。
+---
