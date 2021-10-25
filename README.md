@@ -75,3 +75,39 @@ type IGroup interface {
 	Group(string) IGroup
 }
 ```
+- 实现路由功能步骤
+	- 定义树和节点的数据结构
+	- 编写函数：“增加路由规则”
+	- 编写函数：“查找路由”
+	- 将“增加路由规则”和“查找路由”添加到框架中
+---
+ #### 04 中间件：提高框架的可拓展性
+
+- 设计一个机制，将非业务逻辑代码抽象出来，封装好，提供接口给控制器使用，这个机制的实现，就是中间件。中间件要实现装饰器效果，也就是要把其他业务函数包裹在其中，实现洋葱效果，而不是简单的顺序执行全部函数。
+- 目前框架核心逻辑
+···
+以 Core 为中心，在 Core 中设置路由 router，实现了 Tree 结构，在 Tree 结构中包含路由节点 node；在注册路由的时候，将对应的业务核心处理逻辑 handler ，放在 node 结构的 handler 属性中。
+Core 中的 ServeHttp 方法会创建 Context 数据结构，然后 ServeHttp 方法再根据 Request-URI 查找指定 node，并且将 Context 结构和 node 中的控制器 ControllerHandler 结合起来执行具体的业务逻辑。
+···
+- 从洋葱模型到流水线模型
+···
+洋葱模型：
+func TimeoutHandler(fun ControllerHandler, d time.Duration) ControllerHandler {
+  // 使用函数回调
+  return func(c *Context) error {
+   //...
+    }
+}
+// 超时控制器参数中ControllerHandler结构已经去掉
+func Timeout(d time.Duration) framework.ControllerHandler {
+  // 使用函数回调
+  return func(c *framework.Context) error {
+      //...
+    }
+}
+我们可以将每个中间件构造出来的 ControllerHandler 和最终的业务逻辑的 ControllerHandler 结合在一起，都是同样的结构，成为一个 ControllerHandler 数组，也就是控制器链。在最终执行业务代码的时候，能一个个调用控制器链路上的控制器。
+···
+- 框架，如果提供程序（服务）的注册、使用两个部分，这样会很让用户感到很灵活。
+	- node节点上，存储控制器+中间件 数组，是**存储**目的。
+	- context上，存储控制器+中间件 数组，是**调用**目的。
+	- core上，存储控制器+中间件 数组，是**注册**目的。
