@@ -38,10 +38,16 @@ func main() {
 	<-quit
 
 	// 调用Server.Shutdown graceful结束
-	timeoutCtx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	timeoutCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	if err := server.Shutdown(timeoutCtx); err != nil {
-		log.Fatal("Server Shutdown:", err)
+		log.Fatal("Server Grace Shutdown:", err)
 	}
+
+	select {
+	case <-timeoutCtx.Done():
+		log.Println("Timeout of 5 seconds, Server Shutdown")
+	}
+	log.Println("Server Exiting")
 }
