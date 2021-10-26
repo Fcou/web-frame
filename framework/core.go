@@ -30,33 +30,40 @@ func NewCore() *Core {
 
 // 注册中间件
 func (c *Core) Use(middlewares ...ControllerHandler) {
-	c.middlewares = middlewares
+	c.middlewares = append(c.middlewares, middlewares...)
 }
+
+// === http method wrap
 
 // 匹配GET 方法, 增加路由规则
 func (c *Core) Get(url string, handlers ...ControllerHandler) {
-	if err := c.router["GET"].AddRouter(url, handlers); err != nil {
+	// 将core的middleware 和 handlers结合起来
+	allHandlers := append(c.middlewares, handlers...)
+	if err := c.router["GET"].AddRouter(url, allHandlers); err != nil {
 		log.Fatal("add router error: ", err)
 	}
 }
 
 // 匹配POST 方法, 增加路由规则
 func (c *Core) Post(url string, handlers ...ControllerHandler) {
-	if err := c.router["POST"].AddRouter(url, handlers); err != nil {
+	allHandlers := append(c.middlewares, handlers...)
+	if err := c.router["POST"].AddRouter(url, allHandlers); err != nil {
 		log.Fatal("add router error: ", err)
 	}
 }
 
 // 匹配PUT 方法, 增加路由规则
 func (c *Core) Put(url string, handlers ...ControllerHandler) {
-	if err := c.router["PUT"].AddRouter(url, handlers); err != nil {
+	allHandlers := append(c.middlewares, handlers...)
+	if err := c.router["PUT"].AddRouter(url, allHandlers); err != nil {
 		log.Fatal("add router error: ", err)
 	}
 }
 
 // 匹配DELETE 方法, 增加路由规则
 func (c *Core) Delete(url string, handlers ...ControllerHandler) {
-	if err := c.router["DELETE"].AddRouter(url, handlers); err != nil {
+	allHandlers := append(c.middlewares, handlers...)
+	if err := c.router["DELETE"].AddRouter(url, allHandlers); err != nil {
 		log.Fatal("add router error: ", err)
 	}
 }
@@ -81,7 +88,9 @@ func (c *Core) FindRouteNodeByRequest(request *http.Request) *node {
 	return nil
 }
 
+// 所有请求都进入这个函数, 这个函数负责路由分发
 func (c *Core) ServeHTTP(response http.ResponseWriter, request *http.Request) {
+
 	// 封装自定义context
 	ctx := NewContext(request, response)
 

@@ -161,4 +161,66 @@ data := TodoPageData{
     },
 }
 ```
-	
+### 06 重启：进行优雅关闭
+* 优雅关闭服务，关闭进程的时候，不能暴力关闭进程，而是要等进程中的所有请求都逻辑处理结束后，才关闭进程。
+	* “如何控制关闭进程的操作”
+	* “如何等待所有逻辑都处理结束”
+* 如何控制关闭进程的操作
+	* os/signal 库
+	```
+	func main() {
+	// 这个 Goroutine 是启动服务的 Goroutine
+	go func() {
+		server.ListenAndServe()
+	}()
+
+	// 当前的 Goroutine 等待信号量
+	quit := make(chan os.Signal)
+	// 监控信号：SIGINT, SIGTERM, SIGQUIT
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+	// 这里会阻塞当前 Goroutine 等待信号
+	<-quit
+	}
+	使用 Ctrl 或者 kill 命令，它们发送的信号是进入 main 函数的，即只有 main 函数所在的 Goroutine 会接收到，所以必须在 main 函数所在的 Goroutine 监听信号。
+	```
+* 如何等待所有逻辑都处理结束
+	* 为了实现先阻塞，然后等所有连接处理完再结束退出，Shutdown 使用了两层循环。其中：第一层循环是定时无限循环，每过 ticker 的间隔时间，就进入第二层循环；第二层循环会遍历连接中的所有请求，如果已经处理完操作处于 Idle 状态，就关闭连接，直到所有连接都关闭，才返回。
+	```
+	ticker := time.NewTicker(shutdownPollInterval) // 设置轮询时间
+	defer ticker.Stop()
+	for {
+			// 真正的操作
+		if srv.closeIdleConns() && srv.numListeners() == 0 {
+		return lnerr
+		}
+		select {
+		case <-ctx.Done(): // 如果ctx有设置超时，有可能触发超时结束
+		return ctx.Err()
+		case <-ticker.C:  // 如果没有结束，最长等待时间，进行轮询
+		}
+	}
+
+	func (s *Server) closeIdleConns() bool {
+		s.mu.Lock()
+		defer s.mu.Unlock()
+		quiescent := true
+		for c := range s.activeConn {
+			st, unixSec := c.getState()
+			// Issue 22682: treat StateNew connections as if
+			// they're idle if we haven't read the first request's
+			// header in over 5 seconds.
+			if st == StateNew && unixSec < time.Now().Unix()-5 {
+				st = StateIdle
+			}
+			if st != StateIdle || unixSec == 0 {
+				// Assume unixSec == 0 means it's a very new
+				// connection, without state set yet.
+				quiescent = false
+				continue
+			}
+			c.rwc.Close()
+			delete(s.activeConn, c)
+		}
+		return quiescent
+	}
+	```
