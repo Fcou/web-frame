@@ -1,7 +1,8 @@
 # web-frame
 #### 跟着轩脉刃从 0 开始构建 Web 框架
+#### “先系统设计，再定义接口，最后具体实现”
 ---
-#### 01 分析 net/http，创建 Server 数据结构，自实现Handler接口
+### 01 分析 net/http，创建 Server 数据结构，自实现Handler接口
 - Web Server 的本质
 ```
 实际上就是接收、解析 HTTP 请求传输的文本字符，理解这些文本字符的指令，然后进行计算，再将返回值组织成 HTTP 响应的文本字符，通过 TCP 网络传输回去。
@@ -18,7 +19,7 @@
 ```
 - 创建 Server 数据结构，并且在数据结构中创建了自定义的 Handler（Core 数据结构）和监听地址，实现了一个 HTTP 服务。
 ---
-#### 02 添加上下文 Context 为请求设置超时时间
+### 02 添加上下文 Context 为请求设置超时时间
 - 为了防止雪崩，context 标准库的解决思路是：
 **在整个树形逻辑链条中，用上下文控制器 Context，实现每个节点的信息传递和共享。**
 ```
@@ -55,7 +56,7 @@ type cancelCtx struct {
 }
 ```
 ---
-#### 03 实现路由功能，建立url与处理函数的关系（建立与使用）
+### 03 实现路由功能，建立url与处理函数的关系（建立与使用）
 - 抽象理解路由功能，就是建立url与处理函数的对应关系，直接想到的是利用map。
 	- Method   Request-URI   HandlerFunction 三个变量的对应关系需要两个map嵌套实现
 	- map[string]map[string]func
@@ -81,7 +82,7 @@ type IGroup interface {
 	- 编写函数：“查找路由”
 	- 将“增加路由规则”和“查找路由”添加到框架中
 ---
- #### 04 中间件：提高框架的可拓展性
+ ### 04 中间件：提高框架的可拓展性
 
 - 设计一个机制，将非业务逻辑代码抽象出来，封装好，提供接口给控制器使用，这个机制的实现，就是中间件。中间件要实现装饰器效果，也就是要把其他业务函数包裹在其中，实现洋葱效果，而不是简单的顺序执行全部函数。
 - 目前框架核心逻辑
@@ -90,7 +91,7 @@ type IGroup interface {
 Core 中的 ServeHttp 方法会创建 Context 数据结构，然后 ServeHttp 方法再根据 Request-URI 查找指定 node，并且将 Context 结构和 node 中的控制器 ControllerHandler 结合起来执行具体的业务逻辑。
 ···
 - 从洋葱模型到流水线模型
-···
+```
 洋葱模型：
 func TimeoutHandler(fun ControllerHandler, d time.Duration) ControllerHandler {
   // 使用函数回调
@@ -106,9 +107,58 @@ func Timeout(d time.Duration) framework.ControllerHandler {
     }
 }
 我们可以将每个中间件构造出来的 ControllerHandler 和最终的业务逻辑的 ControllerHandler 结合在一起，都是同样的结构，成为一个 ControllerHandler 数组，也就是控制器链。在最终执行业务代码的时候，能一个个调用控制器链路上的控制器。
-···
+```
 - 框架，如果提供程序（服务）的注册、使用两个部分，这样会很让用户感到很灵活。
 	- node节点上，存储控制器+中间件 数组，是**存储**目的。
 	- context上，存储控制器+中间件 数组，是**调用**目的。
 	- core上，存储控制器+中间件 数组，是**注册**目的。
 ---
+### 05 封装：让框架更好用
+* 定义接口让封装更明确：
+	* 请求
+		* 参数信息
+		* header信息
+	* 返回
+		* header设置
+		* body设置
+* **cast库** 实现了多种常见类型之间的相互转换 "github.com/spf13/cast"
+* 获取请求地址 url 中带的参数，使用request.URL.Query()
+* 获取Form 表单中的参数，使用request.ParseForm()
+* 获取请求地址中通配符位置的string，遍历每个node节点，发现是通配符，记录此时的url中的string
+* 注意：request.Body 的读取是一次性的，读取一次之后，下个逻辑再去 request.Body 中是读取不到数据内容的。所以我们读取完 request.Body 之后，还要再复制一份 Body 内容，填充到 request.Body 里
+```
+// 读取文本    
+body, err := ioutil.ReadAll(ctx.request.Body)   
+if err != nil { 
+	return err    
+	}    
+// 重新填充 request.Body，为后续的逻辑二次读取做准备    
+ctx.request.Body = ioutil.NopCloser(bytes.NewBuffer(body))
+```
+* Json和XML最大的不同是：XML 需要使用 XML 解析器来解析，JSON 可以使用标准的 JavaScript 函数来解析。
+* JSONP 是一种我们常用的解决跨域资源共享的方法，获取请求中的参数作为函数名，获取要返回的数据 JSON 作为函数参数，将函数名 + 函数参数作为返回文本
+* HTML 输出方法实现，输出 HTML 页面内容的时候，常用“模版 + 数据”的方式。
+	* 先根据模版创造出 template 结构；再使用 template.Execute 将传入数据和模版结合。
+```
+模板文件：
+<h1>{{.PageTitle}}</h1>
+<ul>
+    {{range .Todos}}
+        {{if .Done}}
+            <li class="done">{{.Title}}</li>
+        {{else}}
+            <li>{{.Title}}</li>
+        {{end}}
+    {{end}}
+</ul>
+传入的数据结构为：
+data := TodoPageData{
+    PageTitle: "My TODO list",
+    Todos: []Todo{
+        {Title: "Task 1", Done: false},
+        {Title: "Task 2", Done: true},
+        {Title: "Task 3", Done: true},
+    },
+}
+```
+	
