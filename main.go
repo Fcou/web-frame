@@ -8,15 +8,17 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
-	"web-frame/framework"
-	"web-frame/framework/middleware"
-	"web-frame/route"
+
+	"github.com/Fcou/web-frame/framework/middleware"
+	"github.com/Fcou/web-frame/route"
+
+	"github.com/Fcou/web-frame/framework/gin"
 )
 
 func main() {
-	core := framework.NewCore()
+	core := gin.New()
 
-	core.Use(middleware.Recovery())
+	core.Use(gin.Recovery())
 	core.Use(middleware.Cost())
 
 	route.RegisterRouter(core)
@@ -42,12 +44,6 @@ func main() {
 	defer cancel()
 
 	if err := server.Shutdown(timeoutCtx); err != nil {
-		log.Fatal("Server Grace Shutdown:", err)
+		log.Fatal("Server Shutdown:", err)
 	}
-
-	select {
-	case <-timeoutCtx.Done():
-		log.Println("Timeout of 5 seconds, Server Shutdown")
-	}
-	log.Println("Server Exiting")
 }

@@ -102,7 +102,7 @@ func TimeoutHandler(fun ControllerHandler, d time.Duration) ControllerHandler {
 // 超时控制器参数中ControllerHandler结构已经去掉
 func Timeout(d time.Duration) framework.ControllerHandler {
   // 使用函数回调
-  return func(c *framework.Context) error {
+  return func(c *gin.Context) error {
       //...
     }
 }
