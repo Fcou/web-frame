@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/Fcou/web-frame/framework/middleware"
+	"github.com/Fcou/web-frame/provider/demo"
 	"github.com/Fcou/web-frame/route"
 
 	"github.com/Fcou/web-frame/framework/gin"
@@ -17,6 +18,9 @@ import (
 
 func main() {
 	core := gin.New()
+
+	// 绑定具体的服务
+	core.Bind(&demo.DemoServiceProvider{})
 
 	core.Use(gin.Recovery())
 	core.Use(middleware.Cost())

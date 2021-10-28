@@ -267,4 +267,29 @@ data := TodoPageData{
 		Boot(Container) error
 		```
 	* 服务容器提供的是“实例化服务的方法”
-* 
+		* 为服务提供注册绑定
+		```
+		// Bind 绑定一个服务提供者，如果关键字凭证已经存在，会进行替换操作，不返回 error
+		Bind(provider ServiceProvider) error
+		```
+		* 提供获取服务实例
+		```
+		// Make 根据关键字凭证获取一个服务
+		Make(key string) (interface{}, error)
+		```
+	* 什么叫**服务实例化**
+		* 服务是服务，也就是定义；实例是实例，也就是现在可用的变量。
+		* 也就是实例化一个服务struct，创建一个实例，也就是在内存中创建可以使用的变量体
+		* instance, err := method(params...)
+* 容器和框架的结合
+	* 绑定服务操作是全局的操作，将服务容器存放在 Engine 中。
+	* 获取服务操作是在**单个请求**中使用的，在 Engine 初始化 Context 的时候，将服务容器传递进入 Context。
+	* 接下来完成服务容器方法的封装。
+		* Engine 封装 Bind 和 IsBind 方法。(封装也就是调用实际容器的方法)
+		* Context 封装 Make、MakeNew、MustMake 方法。
+* 如何创建一个服务提供方
+	* 要有一个服务接口文件 contract.go，存放服务的接口文件和服务凭证。
+	* 需要设计一个 provider.go，这个文件存放服务提供方 ServiceProvider 的实现。
+	* 最后在 service.go 文件中实现具体的服务实例。
+* 如何通过服务提供方创建服务
+	* 需要做两个操作，绑定服务提供方、获取服务
