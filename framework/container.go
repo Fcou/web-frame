@@ -36,8 +36,8 @@ type HadeContainer struct {
 	lock sync.RWMutex
 }
 
-// NewHadeContainer 创建一个服务容器
-func NewHadeContainer() *HadeContainer {
+// NewFcouContainer 创建一个服务容器
+func NewFcouContainer() *HadeContainer {
 	return &HadeContainer{
 		providers: map[string]ServiceProvider{},
 		instances: map[string]interface{}{},
