@@ -14,7 +14,7 @@ type Container interface {
 	// IsBind 关键字凭证是否已经绑定服务提供者
 	IsBind(key string) bool
 
-	// Make 根据关键字凭证获取一个服务
+	// Make 根据关键字凭证获取一个服务，
 	Make(key string) (interface{}, error)
 	// MustMake 根据关键字凭证获取一个服务，如果这个关键字凭证未绑定服务提供者，那么会panic。
 	// 所以在使用这个接口的时候请保证服务容器已经为这个关键字凭证绑定了服务提供者。
@@ -25,8 +25,8 @@ type Container interface {
 	MakeNew(key string, params []interface{}) (interface{}, error)
 }
 
-// FcouContainer 是服务容器的具体实现
-type FcouContainer struct {
+// HadeContainer 是服务容器的具体实现
+type HadeContainer struct {
 	Container
 	// providers 存储注册的服务提供者，key为字符串凭证
 	providers map[string]ServiceProvider
@@ -36,9 +36,9 @@ type FcouContainer struct {
 	lock sync.RWMutex
 }
 
-// NewFcouContainer 创建一个服务容器
-func NewFcouContainer() *FcouContainer {
-	return &FcouContainer{
+// NewHadeContainer 创建一个服务容器
+func NewHadeContainer() *HadeContainer {
+	return &HadeContainer{
 		providers: map[string]ServiceProvider{},
 		instances: map[string]interface{}{},
 		lock:      sync.RWMutex{},
@@ -46,9 +46,9 @@ func NewFcouContainer() *FcouContainer {
 }
 
 // PrintProviders 输出服务容器中注册的关键字
-func (fcou *FcouContainer) PrintProviders() []string {
+func (hade *HadeContainer) PrintProviders() []string {
 	ret := []string{}
-	for _, provider := range fcou.providers {
+	for _, provider := range hade.providers {
 		name := provider.Name()
 
 		line := fmt.Sprint(name)
@@ -58,68 +58,68 @@ func (fcou *FcouContainer) PrintProviders() []string {
 }
 
 // Bind 将服务容器和关键字做了绑定
-func (fcou *FcouContainer) Bind(provider ServiceProvider) error {
-	fcou.lock.Lock()
-	defer fcou.lock.Unlock()
+func (hade *HadeContainer) Bind(provider ServiceProvider) error {
+	hade.lock.Lock()
+	defer hade.lock.Unlock()
 	key := provider.Name()
 
-	fcou.providers[key] = provider
+	hade.providers[key] = provider
 
 	// if provider is not defer
 	if provider.IsDefer() == false {
-		if err := provider.Boot(fcou); err != nil {
+		if err := provider.Boot(hade); err != nil {
 			return err
 		}
 		// 实例化方法
-		params := provider.Params(fcou)
-		method := provider.Register(fcou)
-		instance, err := method(params...) // 相当于NewXXX()方法
+		params := provider.Params(hade)
+		method := provider.Register(hade)
+		instance, err := method(params...)
 		if err != nil {
 			return errors.New(err.Error())
 		}
-		fcou.instances[key] = instance
+		hade.instances[key] = instance
 	}
 	return nil
 }
 
-func (fcou *FcouContainer) IsBind(key string) bool {
-	return fcou.findServiceProvider(key) != nil
+func (hade *HadeContainer) IsBind(key string) bool {
+	return hade.findServiceProvider(key) != nil
 }
 
-func (fcou *FcouContainer) findServiceProvider(key string) ServiceProvider {
-	fcou.lock.RLock()
-	defer fcou.lock.RUnlock()
-	if sp, ok := fcou.providers[key]; ok {
+func (hade *HadeContainer) findServiceProvider(key string) ServiceProvider {
+	hade.lock.RLock()
+	defer hade.lock.RUnlock()
+	if sp, ok := hade.providers[key]; ok {
 		return sp
 	}
 	return nil
 }
 
-func (fcou *FcouContainer) Make(key string) (interface{}, error) {
-	return fcou.make(key, nil, false)
+func (hade *HadeContainer) Make(key string) (interface{}, error) {
+	return hade.make(key, nil, false)
 }
 
-func (fcou *FcouContainer) MustMake(key string) interface{} {
-	serv, err := fcou.make(key, nil, false)
+func (hade *HadeContainer) MustMake(key string) interface{} {
+	serv, err := hade.make(key, nil, false)
 	if err != nil {
 		panic(err)
 	}
 	return serv
 }
 
-func (fcou *FcouContainer) MakeNew(key string, params []interface{}) (interface{}, error) {
-	return fcou.make(key, params, true)
+func (hade *HadeContainer) MakeNew(key string, params []interface{}) (interface{}, error) {
+	return hade.make(key, params, true)
 }
 
-func (fcou *FcouContainer) newInstance(sp ServiceProvider, params []interface{}) (interface{}, error) {
+func (hade *HadeContainer) newInstance(sp ServiceProvider, params []interface{}) (interface{}, error) {
 	// force new a
-	if err := sp.Boot(fcou); err != nil {
+	if err := sp.Boot(hade); err != nil {
 		return nil, err
 	}
 	if params == nil {
-		params = sp.Params(fcou)
+		params = sp.Params(hade)
 	}
-	method := sp.Register(fcou)
+	method := sp.Register(hade)
 	ins, err := method(params...)
 	if err != nil {
 		return nil, errors.New(err.Error())
@@ -128,30 +128,30 @@ func (fcou *FcouContainer) newInstance(sp ServiceProvider, params []interface{})
 }
 
 // 真正的实例化一个服务
-func (fcou *FcouContainer) make(key string, params []interface{}, forceNew bool) (interface{}, error) {
-	fcou.lock.RLock()
-	defer fcou.lock.RUnlock()
+func (hade *HadeContainer) make(key string, params []interface{}, forceNew bool) (interface{}, error) {
+	hade.lock.RLock()
+	defer hade.lock.RUnlock()
 	// 查询是否已经注册了这个服务提供者，如果没有注册，则返回错误
-	sp := fcou.findServiceProvider(key)
+	sp := hade.findServiceProvider(key)
 	if sp == nil {
 		return nil, errors.New("contract " + key + " have not register")
 	}
 
 	if forceNew {
-		return fcou.newInstance(sp, params)
+		return hade.newInstance(sp, params)
 	}
 
 	// 不需要强制重新实例化，如果容器中已经实例化了，那么就直接使用容器中的实例
-	if ins, ok := fcou.instances[key]; ok {
+	if ins, ok := hade.instances[key]; ok {
 		return ins, nil
 	}
 
 	// 容器中还未实例化，则进行一次实例化
-	inst, err := fcou.newInstance(sp, nil)
+	inst, err := hade.newInstance(sp, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	fcou.instances[key] = inst
+	hade.instances[key] = inst
 	return inst, nil
 }
