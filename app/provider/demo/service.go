@@ -1,6 +1,6 @@
 package demo
 
-import "github.com/gohade/hade/framework"
+import "github.com/Fcou/web-frame/framework"
 
 type Service struct {
 	container framework.Container

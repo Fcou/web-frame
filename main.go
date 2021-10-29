@@ -9,23 +9,26 @@ import (
 	"syscall"
 	"time"
 
+	fcouHttp "github.com/Fcou/web-frame/app/http"
+	"github.com/Fcou/web-frame/app/provider/demo"
 	"github.com/Fcou/web-frame/framework/middleware"
-	"github.com/Fcou/web-frame/provider/demo"
-	"github.com/Fcou/web-frame/route"
+	"github.com/Fcou/web-frame/framework/provider/app"
 
 	"github.com/Fcou/web-frame/framework/gin"
 )
 
 func main() {
+	// 创建engine结构
 	core := gin.New()
-
 	// 绑定具体的服务
-	core.Bind(&demo.DemoServiceProvider{})
+	core.Bind(&app.HadeAppProvider{})
+	core.Bind(&demo.DemoProvider{})
 
 	core.Use(gin.Recovery())
 	core.Use(middleware.Cost())
 
-	route.RegisterRouter(core)
+	fcouHttp.Routes(core)
+
 	server := &http.Server{
 		Handler: core,
 		Addr:    ":8888",

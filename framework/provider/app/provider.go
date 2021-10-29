@@ -7,7 +7,7 @@ import (
 
 // HadeAppProvider 提供App的具体实现方法
 type HadeAppProvider struct {
-	BaseFolder string
+	BaseFolder string //BaseFolder 是获取项目的基础路径,再按照目录设计项目结构
 }
 
 // Register 注册HadeApp方法

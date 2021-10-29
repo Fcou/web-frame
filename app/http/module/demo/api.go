@@ -1,10 +1,10 @@
 package demo
 
 import (
-	demoService "github.com/gohade/hade/app/provider/demo"
-	"github.com/gohade/hade/framework/contract"
+	demoService "github.com/Fcou/web-frame/app/provider/demo"
+	"github.com/Fcou/web-frame/framework/contract"
 
-	"github.com/gohade/hade/framework/gin"
+	"github.com/Fcou/web-frame/framework/gin"
 )
 
 type DemoApi struct {

@@ -2,16 +2,19 @@ package app
 
 import (
 	"flag"
-	"github.com/gohade/hade/framework"
-	"github.com/gohade/hade/framework/util"
-	"github.com/pkg/errors"
 	"path/filepath"
+
+	"github.com/Fcou/web-frame/framework"
+	"github.com/Fcou/web-frame/framework/contract"
+	"github.com/Fcou/web-frame/framework/util"
+	"github.com/pkg/errors"
 )
 
 // HadeApp 代表hade框架的App实现
 type HadeApp struct {
-	container  framework.Container // 服务容器
-	baseFolder string              // 基础路径
+	contract.App                     // 实现了App接口
+	container    framework.Container // 服务容器
+	baseFolder   string              // 基础路径
 }
 
 // Version 实现版本

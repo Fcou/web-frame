@@ -1,7 +1,7 @@
 package http
 
 import (
-	"github.com/gohade/hade/framework/gin"
+	"github.com/Fcou/web-frame/framework/gin"
 )
 
 // NewHttpEngine is command

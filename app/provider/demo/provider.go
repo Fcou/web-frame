@@ -1,7 +1,7 @@
 package demo
 
 import (
-	"github.com/gohade/hade/framework"
+	"github.com/Fcou/web-frame/framework"
 )
 
 type DemoProvider struct {

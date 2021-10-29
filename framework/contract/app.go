@@ -1,4 +1,4 @@
-package app
+package contract
 
 // AppKey 定义字符串凭证
 const AppKey = "hade:app"
