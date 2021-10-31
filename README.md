@@ -313,3 +313,51 @@ data := TodoPageData{
 	* **main.go**
 	* **README.md**
 * 目录结构也是一个服务，其他服务想要使用目录结构的时候，可以通过服务容器，来获取目录结构服务实例
+### 10 交互：可以执行命令行的框架才是好框架
+* 利用第三方命令行工具库**cobra**
+```
+// Command代表执行命令的结构
+type Command struct {
+    ....    
+}
+// InitFoo 初始化 Foo 命令
+func InitFoo() *cobra.Command {
+   FooCommand.AddCommand(Foo1Command) //子命令添加方法
+   return FooCommand
+}
+// FooCommand 代表 Foo 命令
+var FooCommand = &cobra.Command{
+   Use:     "foo", //Use 代表这个命令的调用关键字
+   Short:   "foo 的简要说明",
+   Long:    "foo 的长说明",
+   Aliases: []string{"fo", "f"},
+   Example: "foo 命令的例子",
+   //RunE 代表当前命令的真正执行函数
+   RunE: func(c *cobra.Command, args []string) error {
+      container := c.GetContainer()
+      log.Println(container)
+      return nil
+   },
+}
+// Foo1Command 代表 Foo 命令的子命令 Foo1
+var Foo1Command = &cobra.Command{
+   Use:     "foo1",
+   Short:   "foo1 的简要说明",
+   Long:    "foo1 的长说明",
+   Aliases: []string{"fo1", "f1"},
+   Example: "foo1 命令的例子",
+   RunE: func(c *cobra.Command, args []string) error {
+      container := c.GetContainer()
+      log.Println(container)
+      return nil
+   },
+}
+```
+* 如何使用命令行 cobra
+	* 首先，要把 cobra 库引入到框架中，采用源码引入的方式。
+	```
+	我们希望把服务容器嵌入到 Command 结构中，让 Command 在调用执行函数 RunE 时，能从参数中获取到服务容器，这样就能从服务容器中使用之前定义的 Make 系列方法获取出具体的服务实例了。
+	在根 Command 中设置服务容器
+	我们将 Web 服务的启动逻辑封装为一个 Command 命令，将这个 Command 挂载到根 Command 中，然后根据参数获取到这个 Command 节点，执行这个节点中的 RunE 方法，就能启动 Web 服务了。
+	```
+	* 利用 appStartCommand 启动一个Web服务
