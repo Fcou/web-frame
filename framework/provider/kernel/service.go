@@ -7,17 +7,17 @@ import (
 )
 
 // 引擎服务
-type HadeKernelService struct {
+type FcouKernelService struct {
 	engine *gin.Engine
 }
 
 // 初始化web引擎服务实例
-func NewHadeKernelService(params ...interface{}) (interface{}, error) {
+func NewFcouKernelService(params ...interface{}) (interface{}, error) {
 	httpEngine := params[0].(*gin.Engine)
-	return &HadeKernelService{engine: httpEngine}, nil
+	return &FcouKernelService{engine: httpEngine}, nil
 }
 
 // 返回web引擎
-func (s *HadeKernelService) HttpEngine() http.Handler {
+func (s *FcouKernelService) HttpEngine() http.Handler {
 	return s.engine
 }

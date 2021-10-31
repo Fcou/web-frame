@@ -4,7 +4,7 @@ import (
 	"net/http"
 )
 
-const KernelKey = "hade:kernel"
+const KernelKey = "fcou:kernel"
 
 // Kernel 接口提供框架最核心的结构
 type Kernel interface {

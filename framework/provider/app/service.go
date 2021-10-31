@@ -10,7 +10,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-// FcouApp 代表hade框架的App实现
+// FcouApp 代表fcou框架的App实现
 type FcouApp struct {
 	contract.App                     // 实现了App接口
 	container    framework.Container // 服务容器
