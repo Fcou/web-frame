@@ -12,7 +12,7 @@ func main() {
 	// 初始化服务容器
 	container := framework.NewFcouContainer()
 	// 绑定App服务提供者
-	container.Bind(&app.HadeAppProvider{})
+	container.Bind(&app.FcouAppProvider{})
 	// 后续初始化需要绑定的服务提供者...
 
 	// 将HTTP引擎初始化,并且作为服务提供者绑定到服务容器中

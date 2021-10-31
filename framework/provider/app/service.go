@@ -10,20 +10,20 @@ import (
 	"github.com/pkg/errors"
 )
 
-// HadeApp 代表hade框架的App实现
-type HadeApp struct {
+// FcouApp 代表hade框架的App实现
+type FcouApp struct {
 	contract.App                     // 实现了App接口
 	container    framework.Container // 服务容器
 	baseFolder   string              // 基础路径
 }
 
 // Version 实现版本
-func (h HadeApp) Version() string {
+func (h FcouApp) Version() string {
 	return "0.0.3"
 }
 
 // BaseFolder 表示基础目录，可以代表开发场景的目录，也可以代表运行时候的目录
-func (h HadeApp) BaseFolder() string {
+func (h FcouApp) BaseFolder() string {
 	if h.baseFolder != "" {
 		return h.baseFolder
 	}
@@ -41,54 +41,54 @@ func (h HadeApp) BaseFolder() string {
 }
 
 // ConfigFolder  表示配置文件地址
-func (h HadeApp) ConfigFolder() string {
+func (h FcouApp) ConfigFolder() string {
 	return filepath.Join(h.BaseFolder(), "config")
 }
 
 // LogFolder 表示日志存放地址
-func (h HadeApp) LogFolder() string {
+func (h FcouApp) LogFolder() string {
 	return filepath.Join(h.StorageFolder(), "log")
 }
 
-func (h HadeApp) HttpFolder() string {
+func (h FcouApp) HttpFolder() string {
 	return filepath.Join(h.BaseFolder(), "http")
 }
 
-func (h HadeApp) ConsoleFolder() string {
+func (h FcouApp) ConsoleFolder() string {
 	return filepath.Join(h.BaseFolder(), "console")
 }
 
-func (h HadeApp) StorageFolder() string {
+func (h FcouApp) StorageFolder() string {
 	return filepath.Join(h.BaseFolder(), "storage")
 }
 
 // ProviderFolder 定义业务自己的服务提供者地址
-func (h HadeApp) ProviderFolder() string {
+func (h FcouApp) ProviderFolder() string {
 	return filepath.Join(h.BaseFolder(), "provider")
 }
 
 // MiddlewareFolder 定义业务自己定义的中间件
-func (h HadeApp) MiddlewareFolder() string {
+func (h FcouApp) MiddlewareFolder() string {
 	return filepath.Join(h.HttpFolder(), "middleware")
 }
 
 // CommandFolder 定义业务定义的命令
-func (h HadeApp) CommandFolder() string {
+func (h FcouApp) CommandFolder() string {
 	return filepath.Join(h.ConsoleFolder(), "command")
 }
 
 // RuntimeFolder 定义业务的运行中间态信息
-func (h HadeApp) RuntimeFolder() string {
+func (h FcouApp) RuntimeFolder() string {
 	return filepath.Join(h.StorageFolder(), "runtime")
 }
 
 // TestFolder 定义测试需要的信息
-func (h HadeApp) TestFolder() string {
+func (h FcouApp) TestFolder() string {
 	return filepath.Join(h.BaseFolder(), "test")
 }
 
-// NewHadeApp 初始化HadeApp
-func NewHadeApp(params ...interface{}) (interface{}, error) {
+// NewFcouApp 初始化FcouApp
+func NewFcouApp(params ...interface{}) (interface{}, error) {
 	if len(params) != 2 {
 		return nil, errors.New("param error")
 	}
@@ -96,5 +96,5 @@ func NewHadeApp(params ...interface{}) (interface{}, error) {
 	// 有两个参数，一个是容器，一个是baseFolder
 	container := params[0].(framework.Container)
 	baseFolder := params[1].(string)
-	return &HadeApp{baseFolder: baseFolder, container: container}, nil
+	return &FcouApp{baseFolder: baseFolder, container: container}, nil
 }
