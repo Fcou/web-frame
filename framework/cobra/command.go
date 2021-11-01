@@ -26,6 +26,7 @@ import (
 	"strings"
 
 	"github.com/Fcou/web-frame/framework"
+	"github.com/robfig/cron/v3"
 
 	flag "github.com/spf13/pflag"
 )
@@ -38,6 +39,10 @@ type FParseErrWhitelist flag.ParseErrorsWhitelist
 // you to define the usage and description as part of your command
 // definition to ensure usability.
 type Command struct {
+	// Command支持cron，只在RootCommand中有这个值
+	Cron *cron.Cron
+	// 对应Cron命令的说明文档
+	CronSpecs []CronSpec
 	// 服务容器
 	container framework.Container
 	// Use is the one-line usage message.
