@@ -361,3 +361,22 @@ var Foo1Command = &cobra.Command{
 	我们将 Web 服务的启动逻辑封装为一个 Command 命令，将这个 Command 挂载到根 Command 中，然后根据参数获取到这个 Command 节点，执行这个节点中的 RunE 方法，就能启动 Web 服务了。
 	```
 	* 利用 appStartCommand 启动一个Web服务
+* 核心流程
+	* 初始化服务容器，将各种服务绑定到容器中
+	* 将HTTP引擎初始化，并且作为服务提供者绑定到服务容器中
+		* NewHttpEngine 创建了一个绑定了路由的Web引擎 gin.engine
+		* 服务容器通过服务提供者FcouKernelProvider绑定该 gin.engine 
+	* 创建根Command，为根Command设置服务容器
+	* 在根Command上添加各种命令
+		* DemoCommand 命令的 RunE：显示当前路径
+			* 获取根Command上的容器 container := c.GetContainer()
+			* 从服务容器中获取app的服务实例
+			* 调用app服务实例的方法，appService.BaseFolder()，打印出路径
+		* appStartCommand 命令的 RunE：启动一个Web服务
+			* 获取根Command上的容器
+			* 从服务容器中获取kernel的服务实例
+			* 从kernel服务实例中获取引擎core
+			* 创建一个Server服务
+			* goroutine server.ListenAndServe()
+			* 优雅关闭
+	* 运行根Command
