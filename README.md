@@ -380,3 +380,62 @@ var Foo1Command = &cobra.Command{
 			* goroutine server.ListenAndServe()
 			* 优雅关闭
 	* 运行根Command
+---
+### 11 定时任务：让框架支持分布式定时脚本
+* 使用 cron 包定时执行命令
+```
+
+// 创建一个cron实例
+c := cron.New()
+
+// 每整点30分钟执行一次
+c.AddFunc("30 * * * *", func() { 
+  fmt.Println("Every hour on the half hour") 
+})
+// 上午3-6点，下午8-11点的30分钟执行
+c.AddFunc("30 3-6,20-23 * * *", func() {
+  fmt.Println(".. in the range 3-6am, 8-11pm") 
+})
+// 东京时间4:30执行一次
+c.AddFunc("CRON_TZ=Asia/Tokyo 30 04 * * *", func() { 
+  fmt.Println("Runs at 04:30 Tokyo time every day") 
+})
+// 从现在开始每小时执行一次
+c.AddFunc("@hourly",      func() { 
+  fmt.Println("Every hour, starting an hour from now") 
+})
+// 从现在开始，每一个半小时执行一次
+c.AddFunc("@every 1h30m", func() { 
+  fmt.Println("Every hour thirty, starting an hour thirty from now") 
+})
+
+// 启动cron
+c.Start()
+
+...
+// 在cron运行过程中增加任务
+c.AddFunc("@daily", func() { fmt.Println("Every day") })
+..
+// 查看运行中的任务
+inspect(c.Entries())
+..
+// 停止cron的运行，优雅停止，所有正在运行中的任务不会停止。
+c.Stop() 
+```
+* 支持秒级别的定时
+	* 只增加一行代码就能定时执行某个命令
+	* AddCronCommand 函数中核心要做的，就是将 Command 结构的执行封装成一个匿名函数，再调用 cron 的 AddFunc 方法就可以了。
+	* 将初始化的 Cron 对象放在根 Command 中。
+	* 根 Command 结构中放入 Cron 实例，还放入了一个 CronSpecs 的数组，这个数组用来保存所有 Cron 命令的信息，为后续查看所有定时任务而准备
+```
+// 创建一个cron实例
+c := cron.New(cron.WithParser(cron.NewParser(cron.SecondOptional | cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow | cron.Descriptor)))
+
+// 每秒执行一次
+c.AddFunc("* * * * * *", func() { 
+  fmt.Println("Every hour on the half hour") 
+})
+// 每秒调用一次Foo命令
+rootCmd.AddCronCommand("* * * * * *", demo.FooCommand)
+```
+	
