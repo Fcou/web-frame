@@ -382,6 +382,7 @@ var Foo1Command = &cobra.Command{
 	* 运行根Command
 ---
 ### 11 定时任务：让框架支持分布式定时脚本
+* 要启动其他程序，创建进程
 * 使用 cron 包定时执行命令
 ```
 
@@ -427,6 +428,7 @@ c.Stop()
 	* AddCronCommand 函数中核心要做的，就是将 Command 结构的执行封装成一个匿名函数，再调用 cron 的 AddFunc 方法就可以了。
 	* 将初始化的 Cron 对象放在根 Command 中。
 	* 根 Command 结构中放入 Cron 实例，还放入了一个 CronSpecs 的数组，这个数组用来保存所有 Cron 命令的信息，为后续查看所有定时任务而准备
+	* 在匿名函数中，封装的并不是传递进来的 Command，而是把这个 Command 做了一个副本，并且将其父节点设置为空，让它自身就是一个新的根节点；然后调用这个 Command 的 Execute 方法。
 ```
 // 创建一个cron实例
 c := cron.New(cron.WithParser(cron.NewParser(cron.SecondOptional | cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow | cron.Descriptor)))
@@ -438,4 +440,6 @@ c.AddFunc("* * * * * *", func() {
 // 每秒调用一次Foo命令
 rootCmd.AddCronCommand("* * * * * *", demo.FooCommand)
 ```
-	
+* 使用 cron 的三级命令对某个进程进行管理
+	* 可以使用标准库 osos.GetPid()获取pid
+	* 运行一个子进程，使用 os.StartProcess 来启动一个进程，执行当前进程相同的二进制文件以及当前进程相同的参数。使用开源库 go-daemon
