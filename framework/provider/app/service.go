@@ -79,6 +79,11 @@ func (h FcouApp) TestFolder() string {
 	return filepath.Join(h.BaseFolder(), "test")
 }
 
+// LoadAppConfig 加载新的AppConfig
+func (h FcouApp) LoadAppConfig(kv map[string]string) {
+	return
+}
+
 // NewFcouApp 初始化FcouApp
 func NewFcouApp(params ...interface{}) (interface{}, error) {
 	if len(params) != 2 {
