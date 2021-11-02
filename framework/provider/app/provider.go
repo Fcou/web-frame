@@ -7,7 +7,7 @@ import (
 
 // FcouAppProvider 提供App的具体实现方法
 type FcouAppProvider struct {
-	BaseFolder string //BaseFolder 是获取项目的基础路径,再按照目录设计项目结构
+	BaseFolder string
 }
 
 // Register 注册FcouApp方法
