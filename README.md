@@ -455,3 +455,4 @@ rootCmd.AddCronCommand("* * * * * *", demo.FooCommand)
 	多个进程同时使用 os.OpenFile 打开一个文件，并使用 syscall.Flock 带上 syscall.LOCK_EX 参数来对这个文件加文件锁，这里只会有一个进程抢占到文件锁，而其他抢占不到的进程从 syscall.Flock 函数中获取到的就是 error。根据这个 error 是否为空，我们就能判断是否抢占到了文件锁。
 	```
 	* 现在有了分布式选择器，就可以实现分布式调度了。我们为 Command 结构增加一个方法 AddDistributedCronCommand,它的实现和 AddCronCommand 差不多，唯一的区别就是在封装 cron.AddFunc 的匿名函数中，运行目标命令之前，要做一次分布式选举，如果被选举上了，才执行目标命令。
+### 12｜配置和环境：配置服务中的设计思路
