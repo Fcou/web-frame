@@ -10,22 +10,29 @@ import (
 	"github.com/pkg/errors"
 )
 
-// FcouApp 代表Fcou框架的App实现
+// FcouApp 代表fcou框架的App实现
 type FcouApp struct {
 	container  framework.Container // 服务容器
 	baseFolder string              // 基础路径
 	appId      string              // 表示当前这个app的唯一id, 可以用于分布式锁等
+
+	configMap map[string]string // 配置加载
+}
+
+// AppID 表示这个App的唯一ID
+func (app FcouApp) AppID() string {
+	return app.appId
 }
 
 // Version 实现版本
-func (h FcouApp) Version() string {
+func (app FcouApp) Version() string {
 	return "0.0.3"
 }
 
 // BaseFolder 表示基础目录，可以代表开发场景的目录，也可以代表运行时候的目录
-func (h FcouApp) BaseFolder() string {
-	if h.baseFolder != "" {
-		return h.baseFolder
+func (app FcouApp) BaseFolder() string {
+	if app.baseFolder != "" {
+		return app.baseFolder
 	}
 
 	// 如果参数也没有，使用默认的当前路径
@@ -33,55 +40,80 @@ func (h FcouApp) BaseFolder() string {
 }
 
 // ConfigFolder  表示配置文件地址
-func (h FcouApp) ConfigFolder() string {
-	return filepath.Join(h.BaseFolder(), "config")
+func (app FcouApp) ConfigFolder() string {
+	if val, ok := app.configMap["config_folder"]; ok {
+		return val
+	}
+	return filepath.Join(app.BaseFolder(), "config")
 }
 
 // LogFolder 表示日志存放地址
-func (h FcouApp) LogFolder() string {
-	return filepath.Join(h.StorageFolder(), "log")
+func (app FcouApp) LogFolder() string {
+	if val, ok := app.configMap["log_folder"]; ok {
+		return val
+	}
+	return filepath.Join(app.StorageFolder(), "log")
 }
 
-func (h FcouApp) HttpFolder() string {
-	return filepath.Join(h.BaseFolder(), "http")
+func (app FcouApp) HttpFolder() string {
+	if val, ok := app.configMap["http_folder"]; ok {
+		return val
+	}
+	return filepath.Join(app.BaseFolder(), "http")
 }
 
-func (h FcouApp) ConsoleFolder() string {
-	return filepath.Join(h.BaseFolder(), "console")
+func (app FcouApp) ConsoleFolder() string {
+	if val, ok := app.configMap["console_folder"]; ok {
+		return val
+	}
+	return filepath.Join(app.BaseFolder(), "console")
 }
 
-func (h FcouApp) StorageFolder() string {
-	return filepath.Join(h.BaseFolder(), "storage")
+func (app FcouApp) StorageFolder() string {
+	if val, ok := app.configMap["storage_folder"]; ok {
+		return val
+	}
+	return filepath.Join(app.BaseFolder(), "storage")
 }
 
 // ProviderFolder 定义业务自己的服务提供者地址
-func (h FcouApp) ProviderFolder() string {
-	return filepath.Join(h.BaseFolder(), "provider")
+func (app FcouApp) ProviderFolder() string {
+	if val, ok := app.configMap["provider_folder"]; ok {
+		return val
+	}
+	return filepath.Join(app.BaseFolder(), "provider")
 }
 
 // MiddlewareFolder 定义业务自己定义的中间件
-func (h FcouApp) MiddlewareFolder() string {
-	return filepath.Join(h.HttpFolder(), "middleware")
+func (app FcouApp) MiddlewareFolder() string {
+	if val, ok := app.configMap["middleware_folder"]; ok {
+		return val
+	}
+	return filepath.Join(app.HttpFolder(), "middleware")
 }
 
 // CommandFolder 定义业务定义的命令
-func (h FcouApp) CommandFolder() string {
-	return filepath.Join(h.ConsoleFolder(), "command")
+func (app FcouApp) CommandFolder() string {
+	if val, ok := app.configMap["command_folder"]; ok {
+		return val
+	}
+	return filepath.Join(app.ConsoleFolder(), "command")
 }
 
 // RuntimeFolder 定义业务的运行中间态信息
-func (h FcouApp) RuntimeFolder() string {
-	return filepath.Join(h.StorageFolder(), "runtime")
+func (app FcouApp) RuntimeFolder() string {
+	if val, ok := app.configMap["runtime_folder"]; ok {
+		return val
+	}
+	return filepath.Join(app.StorageFolder(), "runtime")
 }
 
 // TestFolder 定义测试需要的信息
-func (h FcouApp) TestFolder() string {
-	return filepath.Join(h.BaseFolder(), "test")
-}
-
-// LoadAppConfig 加载新的AppConfig
-func (h FcouApp) LoadAppConfig(kv map[string]string) {
-	return
+func (app FcouApp) TestFolder() string {
+	if val, ok := app.configMap["test_folder"]; ok {
+		return val
+	}
+	return filepath.Join(app.BaseFolder(), "test")
 }
 
 // NewFcouApp 初始化FcouApp
@@ -99,10 +131,13 @@ func NewFcouApp(params ...interface{}) (interface{}, error) {
 		flag.Parse()
 	}
 	appId := uuid.New().String()
-	return &FcouApp{baseFolder: baseFolder, container: container, appId: appId}, nil
+	configMap := map[string]string{}
+	return &FcouApp{baseFolder: baseFolder, container: container, appId: appId, configMap: configMap}, nil
 }
 
-// AppID 表示这个App的唯一ID
-func (h FcouApp) AppID() string {
-	return h.appId
+// LoadAppConfig 加载配置map
+func (app *FcouApp) LoadAppConfig(kv map[string]string) {
+	for key, val := range kv {
+		app.configMap[key] = val
+	}
 }
