@@ -445,4 +445,13 @@ rootCmd.AddCronCommand("* * * * * *", demo.FooCommand)
 	* state       cron常驻进程状态  
 	* stop        停止cron常驻进程
 	* 可以使用标准库 osos.GetPid()获取pid
-	* 使用开源**go-daemon**库，运行一个子进程，使用 os.StartProcess 来启动一个进程，执行当前进程相同的二进制文件以及当前进程相同的参数。调用一个 Reborn 方法启动一个子进程。
+	* 在 Golang 中，如何启动一个当前二进制文件的子进程。
+		* 使用开源**go-daemon**库，运行一个子进程，使用 os.StartProcess 来启动一个进程，执行当前进程相同的二进制文件以及当前进程相同的参数。调用一个 Reborn 方法启动一个子进程。
+	* 启动三级命令行工具./fcou cron start -d，看到控制台打印出了子进程 PID 信息，和日志存储地址。
+* 如何实现分布式定时器
+	* appID 是为每个当前应用起的唯一标识，它用 Google 的 **uuid** 生成库 就可以很方便生成
+	* 一个本地文件锁。当一个服务器上有多个进程需要进行抢锁操作，文件锁是一种单机多进程抢占的很简易的实现方式
+	```
+	多个进程同时使用 os.OpenFile 打开一个文件，并使用 syscall.Flock 带上 syscall.LOCK_EX 参数来对这个文件加文件锁，这里只会有一个进程抢占到文件锁，而其他抢占不到的进程从 syscall.Flock 函数中获取到的就是 error。根据这个 error 是否为空，我们就能判断是否抢占到了文件锁。
+	```
+	* 现在有了分布式选择器，就可以实现分布式调度了。我们为 Command 结构增加一个方法 AddDistributedCronCommand,它的实现和 AddCronCommand 差不多，唯一的区别就是在封装 cron.AddFunc 的匿名函数中，运行目标命令之前，要做一次分布式选举，如果被选举上了，才执行目标命令。
