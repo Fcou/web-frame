@@ -485,6 +485,10 @@ rootCmd.AddCronCommand("* * * * * *", demo.FooCommand)
 	* 配置服务的代码实现
 		* 先检查配置文件夹是否存在，然后读取文件夹中的每个以 yaml 或者 yml 后缀的文件；读取之后，先用 replace 对环境变量进行一次替换；替换之后使用 go-yaml，对文件进行解析。
 	* 配置文件更新 App 服务
+		* 在fcou框架的FcouApp实现中配置加载，configMap map[string]string
+		* 在 configService，读取配置文件 loadConfigFile 的时候，加载 app.yaml 的配置文件的时候，就同时更新 FcouApp 里面的 configMap
 	* 配置文件热更新
 		* 我们可以自动监控配置文件目录下的所有文件，当配置文件有修改和更新的时候，能自动更新程序中的配置文件信息，也就是实现配置文件热更新。
 		* 我们使用 **fsnotify库**能很方便对一个文件夹进行监控，当文件夹中有文件增 / 删 / 改的时候，会通过 channel 进行事件回调。
+		* 这个库先使用 NewWatcher 创建一个监控器 watcher，然后使用 Add 来监控某个文件夹，通过 watcher 设置的 events 来判断文件是否有变化，如果有变化，就进行对应的操作，比如更新内存中配置服务存储的 map 结构。
+*  Windows 系统不支持 pid 锁，所以我们需要在 Linux 或 Mac 系统下才能正常运行上面的程序。
