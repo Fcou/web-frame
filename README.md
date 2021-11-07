@@ -535,3 +535,15 @@ rootCmd.AddCronCommand("* * * * * *", demo.FooCommand)
 	* Vue框架：“创造了一个概念叫渐进的框架。因为 Vue 的核心组成只是数据绑定和组件”
 	* HTTP 库提供 FileServer 来封装对文件读取的 HTTP 服务。我们就可以使用这个 FileServer，来对前端编译出来的最终的浏览器可运行文件，提供 HTTP 服务
 	* 将 Vue 的项目代码集成到业务代码中，然后确定其编译结果文件夹，在路由中，将某个请求路由到我们的编译结果文件夹，就完成了上面架构提到的同一个项目同时支持前端请求和后端请求了
+	* vue-init webpack fcou 创建一个最完整的 fcou 项目
+		* build 目录，存放项目构建（Webpack）相关的代码。
+		* config 是配置目录，包括端口号等配置。
+		* src 目录，这个是我们要开发的目录，业务逻辑代码基本上都在里面。
+			* assets 存放一些图片信息
+			* componenets 存放组件信息文件
+			* App.vue 存放项目的入口组件 App
+			* main.js 是项目的入口 js，引用加载入口组件 App。
+		* static 目录，存放静态文件信息，比如图片、字体等。
+		* test 目录，存放测试相关的信息。
+		* index.html 是 Vue 首页的入口页面
+		* package.json 是项目的配置文件，保存引用的第三方库等信息
