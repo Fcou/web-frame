@@ -535,6 +535,41 @@ rootCmd.AddCronCommand("* * * * * *", demo.FooCommand)
 	* Vue框架：“创造了一个概念叫渐进的框架。因为 Vue 的核心组成只是数据绑定和组件”
 	* HTTP 库提供 FileServer 来封装对文件读取的 HTTP 服务。我们就可以使用这个 FileServer，来对前端编译出来的最终的浏览器可运行文件，提供 HTTP 服务
 	* 将 Vue 的项目代码集成到业务代码中，然后确定其编译结果文件夹，在路由中，将某个请求路由到我们的编译结果文件夹，就完成了上面架构提到的同一个项目同时支持前端请求和后端请求了
+	```
+	路由注册时，先添加静态路由，再添加动态路由
+	// /路径先去./dist目录下查找文件是否存在，找到使用文件服务提供服务
+	r.Use(static.Serve("/", static.LocalFile("./fcou/dist", false)))
+	```
+	* 完整流程
+		* 1. 安装npm,到node.js官网下载安装node.js,自带npm
+		```
+		node -v  //查看版本
+		npm -v
+		```
+		* 2. 安装vue
+		```
+		npm install vue -g
+		npm install vue-cli -g
+		```
+		* 3. 安装webpack
+		```
+		npm install  webpack -g
+		npm install  webpack-cli -g
+		```
+		* 4. 新建项目，创建项目目录，进入此目录的终端
+		```
+		vue init webpack my-project   // 创建一个基于 webpack 模板的新项目
+		// 这里需要进行一些配置，默认回车即可
+		```
+		* 5. 进入项目和安装依赖,生成的 index 文件，存放在根目录的 dist 目录下
+		```
+		npm install   //加载目录所需要的第三方库
+		npm run build //执行 Vue 的编译操作
+		```
+		* 6. 启动项目
+		```
+		npm run dev
+		```
 	* vue-init webpack fcou 创建一个最完整的 fcou 项目
 		* build 目录，存放项目构建（Webpack）相关的代码。
 		* config 是配置目录，包括端口号等配置。
@@ -545,5 +580,14 @@ rootCmd.AddCronCommand("* * * * * *", demo.FooCommand)
 			* main.js 是项目的入口 js，引用加载入口组件 App。
 		* static 目录，存放静态文件信息，比如图片、字体等。
 		* test 目录，存放测试相关的信息。
+		* dist 目录，编译完成后的结果
 		* index.html 是 Vue 首页的入口页面
 		* package.json 是项目的配置文件，保存引用的第三方库等信息
+* 前后端一体化编译命令改造
+	* 需求整理成以下四个命令
+	```
+	编译前端  ./fcou build frontend
+	编译后端  ./fcou build backend
+	同时编译前后端 ./fcou build all
+	自编译 ./fcou build self
+	```
