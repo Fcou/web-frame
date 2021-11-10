@@ -595,3 +595,44 @@ rootCmd.AddCronCommand("* * * * * *", demo.FooCommand)
 	同时编译前后端 ./fcou build all
 	自编译 ./fcou build self
 	```
+---
+### 15 提效：实现调试模式加速开发效率
+* 后端开启调试模式
+```
+在使用 Vue 的时候， npm run dev 这个命令，为前端开启调试模式，只要你修改了 src 下的文件，编译器就会自动重新编译，并且更新浏览器页面上的渲染。那这种调试模式能否应用到 Golang 后端，进一步提升我们开发应用的效率。
+```
+	* 先通过 go build 编译出二进制文件，通过运行二进制文件再启动服务。
+	* 对配置目录下的所有文件进行变更监听，一旦修改了配置目录下的文件，就重新更新内存中的配置文件 map
+	* 前后端服务同时调试？是否能在前端和后端服务的前面，设计一个反向代理 proxy 服务呢
+	* 让所有外部请求进入这个反响代理服务，然后由反向代理服务进行代理分发，前端请求分发到前端进程，后端请求分发到后端进程。
+* 如何实现反向代理
+	* 所谓反向代理，就是能将一个请求按照条件分发到不同的服务中去。在 Golang 中的 net/http/httputil 包中提供了 ReverseProxy 这么一个数据结构，它是实现整个反向代理的关键。
+	```
+	// 反向代理
+	type ReverseProxy struct {
+		// Director这个函数传入的参数是新复制的一个请求，我们可以修改这个请求
+		// 比如修改请求的请求Host或者请求URL等
+	Director func(*http.Request)
+
+	// Transport 代表底层的连接池设置，比如连接最长保持多久等
+		// 如果不填的话，则使用默认的设置
+	Transport http.RoundTripper
+
+	// FlushInterval表示多久将下游的response的数据拷贝到proxy的response
+	FlushInterval time.Duration
+
+	// ErrorLog 表示错误日志打印的句柄
+	ErrorLog *log.Logger
+
+	// BufferPool表示将下游response拷贝到proxy的response的时候使用的缓冲池大小
+	BufferPool BufferPool
+
+	// ModifyResponse 函数表示，如果要将下游的response内容进行修改，再传递给proxy
+		// 的response，这个函数就可以进行设置，但是如果这个函数返回了error，则将response
+		// 传递进入ErrorHandler，否则使用默认设置
+	ModifyResponse func(*http.Response) error
+
+	// ErrorHandler 处理ModifyResponse返回的Error
+	ErrorHandler func(http.ResponseWriter, *http.Request, error)
+	}
+	```
