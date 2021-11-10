@@ -4,47 +4,21 @@ import "github.com/Fcou/web-frame/framework/cobra"
 
 // AddKernelCommands will add all command/* to root command
 func AddKernelCommands(root *cobra.Command) {
+	// cron 定时
+	root.AddCommand(initCronCommand())
+	// build 编译前后端
+	root.AddCommand(initBuildCommand())
+	// app 业务
+	root.AddCommand(initAppCommand())
+	// go build 编译main.go
+	root.AddCommand(goCommand)
+	// npm build 编译
+	root.AddCommand(npmCommand)
+	// env 获取环境变量
+	root.AddCommand(initEnvCommand())
+
 	//root.AddCommand(DemoCommand)
 
-	//root.AddCommand(initEnvCommand())
 	//root.AddCommand(deployCommand)
-	//
-	// cron
-	root.AddCommand(initCronCommand())
-	//// cmd
-	//cmdCommand.AddCommand(cmdListCommand)
-	//cmdCommand.AddCommand(cmdCreateCommand)
-	//root.AddCommand(cmdCommand)
 
-	// build
-	root.AddCommand(initBuildCommand())
-	//
-	// app
-	root.AddCommand(initAppCommand())
-	// go build
-	root.AddCommand(goCommand)
-	// npm build
-	root.AddCommand(npmCommand)
-	//
-	//// dev
-	//root.AddCommand(initDevCommand())
-	//
-	//// middleware
-	//middlewareCommand.AddCommand(middlewareAllCommand)
-	//middlewareCommand.AddCommand(middlewareAddCommand)
-	//middlewareCommand.AddCommand(middlewareRemoveCommand)
-	//root.AddCommand(middlewareCommand)
-	//
-	//// swagger
-	//swagger.IndexCommand.AddCommand(swagger.InitServeCommand())
-	//swagger.IndexCommand.AddCommand(swagger.GenCommand)
-	//root.AddCommand(swagger.IndexCommand)
-	//
-	//// provider
-	//providerCommand.AddCommand(providerListCommand)
-	//providerCommand.AddCommand(providerCreateCommand)
-	//root.AddCommand(providerCommand)
-	//
-	//// new
-	//root.AddCommand(initNewCommand())
 }

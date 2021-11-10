@@ -33,57 +33,6 @@ type FcouConfig struct {
 	confRaws map[string][]byte      // 配置文件的原始信息
 }
 
-// 读取某个配置文件
-func (conf *FcouConfig) loadConfigFile(folder string, file string) error {
-	conf.lock.Lock()
-	defer conf.lock.Unlock()
-
-	//  判断文件是否以yaml或者yml作为后缀
-	s := strings.Split(file, ".")
-	if len(s) == 2 && (s[1] == "yaml" || s[1] == "yml") {
-		name := s[0]
-
-		// 读取文件内容
-		bf, err := ioutil.ReadFile(filepath.Join(folder, file))
-		if err != nil {
-			return err
-		}
-		// 直接针对文本做环境变量的替换
-		bf = replace(bf, conf.envMaps)
-		// 解析对应的文件
-		c := map[string]interface{}{}
-		if err := yaml.Unmarshal(bf, &c); err != nil {
-			return err
-		}
-		conf.confMaps[name] = c
-		conf.confRaws[name] = bf
-
-		// 读取app.path中的信息，更新app对应的folder
-		if name == "app" && conf.c.IsBind(contract.AppKey) {
-			if p, ok := c["path"]; ok {
-				appService := conf.c.MustMake(contract.AppKey).(contract.App)
-				appService.LoadAppConfig(cast.ToStringMapString(p))
-			}
-		}
-	}
-	return nil
-}
-
-// 删除文件的操作
-func (conf *FcouConfig) removeConfigFile(folder string, file string) error {
-	conf.lock.Lock()
-	defer conf.lock.Unlock()
-	s := strings.Split(file, ".")
-	// 只有yaml或者yml后缀才执行
-	if len(s) == 2 && (s[1] == "yaml" || s[1] == "yml") {
-		name := s[0]
-		// 删除内存中对应的key
-		delete(conf.confRaws, name)
-		delete(conf.confMaps, name)
-	}
-	return nil
-}
-
 // NewFcouConfig 初始化Config方法
 func NewFcouConfig(params ...interface{}) (interface{}, error) {
 	container := params[0].(framework.Container)
@@ -172,6 +121,57 @@ func NewFcouConfig(params ...interface{}) (interface{}, error) {
 	}()
 
 	return fcouConf, nil
+}
+
+// 读取某个配置文件
+func (conf *FcouConfig) loadConfigFile(folder string, file string) error {
+	conf.lock.Lock()
+	defer conf.lock.Unlock()
+
+	//  判断文件是否以yaml或者yml作为后缀
+	s := strings.Split(file, ".")
+	if len(s) == 2 && (s[1] == "yaml" || s[1] == "yml") {
+		name := s[0]
+
+		// 读取文件内容
+		bf, err := ioutil.ReadFile(filepath.Join(folder, file))
+		if err != nil {
+			return err
+		}
+		// 直接针对文本做环境变量的替换
+		bf = replace(bf, conf.envMaps)
+		// 解析对应的文件
+		c := map[string]interface{}{}
+		if err := yaml.Unmarshal(bf, &c); err != nil {
+			return err
+		}
+		conf.confMaps[name] = c
+		conf.confRaws[name] = bf
+
+		// 读取app.path中的信息，更新app对应的folder
+		if name == "app" && conf.c.IsBind(contract.AppKey) {
+			if p, ok := c["path"]; ok {
+				appService := conf.c.MustMake(contract.AppKey).(contract.App)
+				appService.LoadAppConfig(cast.ToStringMapString(p))
+			}
+		}
+	}
+	return nil
+}
+
+// 删除文件的操作
+func (conf *FcouConfig) removeConfigFile(folder string, file string) error {
+	conf.lock.Lock()
+	defer conf.lock.Unlock()
+	s := strings.Split(file, ".")
+	// 只有yaml或者yml后缀才执行
+	if len(s) == 2 && (s[1] == "yaml" || s[1] == "yml") {
+		name := s[0]
+		// 删除内存中对应的key
+		delete(conf.confRaws, name)
+		delete(conf.confMaps, name)
+	}
+	return nil
 }
 
 // replace 表示使用环境变量maps替换context中的env(xxx)的环境变量

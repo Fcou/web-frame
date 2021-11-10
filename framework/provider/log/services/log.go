@@ -21,9 +21,9 @@ type FcouLog struct {
 	c          framework.Container // 容器
 }
 
-// IsLevelEnable 判断这个级别是否可以打印
-func (log *FcouLog) IsLevelEnable(level contract.LogLevel) bool {
-	return level <= log.level
+// Info 会打印出普通的日志信息
+func (log *FcouLog) Info(ctx context.Context, msg string, fields map[string]interface{}) {
+	log.logf(contract.InfoLevel, ctx, msg, fields)
 }
 
 // logf 为打印日志的核心函数
@@ -77,6 +77,11 @@ func (log *FcouLog) logf(level contract.LogLevel, ctx context.Context, msg strin
 	return nil
 }
 
+// IsLevelEnable 判断这个级别是否可以打印
+func (log *FcouLog) IsLevelEnable(level contract.LogLevel) bool {
+	return level <= log.level
+}
+
 // SetOutput 设置output
 func (log *FcouLog) SetOutput(output io.Writer) {
 	log.output = output
@@ -100,11 +105,6 @@ func (log *FcouLog) Error(ctx context.Context, msg string, fields map[string]int
 // Warn will add warn record which contains msg and fields
 func (log *FcouLog) Warn(ctx context.Context, msg string, fields map[string]interface{}) {
 	log.logf(contract.WarnLevel, ctx, msg, fields)
-}
-
-// Info 会打印出普通的日志信息
-func (log *FcouLog) Info(ctx context.Context, msg string, fields map[string]interface{}) {
-	log.logf(contract.InfoLevel, ctx, msg, fields)
 }
 
 // Debug will add debug record which contains msg and fields

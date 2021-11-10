@@ -1,9 +1,9 @@
 host: 127.0.0.1
-user: yejianfeng
+user: fcourage
 password: 123abc 
 rsa_key: 
 timeout: 1000
-remote_path: "/home/yejianfeng/"
+remote_path: "/home/fcourage/"
 post_shell: 
   - "./fcou serve restart"
   - "pwd"

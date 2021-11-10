@@ -3,10 +3,9 @@ package command
 import (
 	"fmt"
 
-	"github.com/Fcou/web-frame/framework/util"
-
 	"github.com/Fcou/web-frame/framework/cobra"
 	"github.com/Fcou/web-frame/framework/contract"
+	"github.com/Fcou/web-frame/framework/util"
 )
 
 // initEnvCommand 获取env相关的命令

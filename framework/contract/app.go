@@ -3,7 +3,7 @@ package contract
 // AppKey 定义字符串凭证
 const AppKey = "fcou:app"
 
-// App 定义接口
+// App 定义接口, 核心业务
 type App interface {
 	// AppID 表示当前这个app的唯一id, 可以用于分布式锁等
 	AppID() string
