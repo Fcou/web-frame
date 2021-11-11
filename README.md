@@ -605,6 +605,9 @@ rootCmd.AddCronCommand("* * * * * *", demo.FooCommand)
 	* 对配置目录下的所有文件进行变更监听，一旦修改了配置目录下的文件，就重新更新内存中的配置文件 map
 	* 前后端服务同时调试？是否能在前端和后端服务的前面，设计一个反向代理 proxy 服务呢
 	* 让所有外部请求进入这个反响代理服务，然后由反向代理服务进行代理分发，前端请求分发到前端进程，后端请求分发到后端进程。
+	* 一个请求到了，直接先请求一下后端服务，如果后端发现请求不存在，返回 404 Not Found 之后， 我们再将请求再请求到前端服务
+	* 前端服务是直接使用 npm run dev 命令启动调试模式的
+	* 后端服务是先进行  go build(监听文件有变化再编译) 再进行  go run ，所以后端服务是需要进行编译的
 * 如何实现反向代理
 	* 所谓反向代理，就是能将一个请求按照条件分发到不同的服务中去。在 Golang 中的 net/http/httputil 包中提供了 ReverseProxy 这么一个数据结构，它是实现整个反向代理的关键。
 	```
@@ -634,5 +637,51 @@ rootCmd.AddCronCommand("* * * * * *", demo.FooCommand)
 
 	// ErrorHandler 处理ModifyResponse返回的Error
 	ErrorHandler func(http.ResponseWriter, *http.Request, error)
+	}
+	```
+	* Director 的参数是请求，表示如何对请求进行转发
+	* ModifyResponse 字段，对下游的返回数据进行修改
+	* ErrorHandler 有三个参数，responseWriter 是新 proxy 的 reponse 的写句柄，request 是 Director 修改后给下游的 request，而 error 则是 ModifyResponse 处理后的 error
+* 配置项的设计
+	* 我们先定义好默认的配置，然后从容器中获取配置服务，通过配置服务，获取对应的配置文件的设置，如果配置文件有对应字段的话，就进行对应字段的配置。
+* 监控某个文件夹的变动，并且重新编译并且运行后端服务, 使用一种计时时间机制
+	* 目标目录变更事件，有事件更新计时机制；
+	* 计时机制到点事件，计时到点事件触发，代表有一个或多个目标目录变更已经存在，更新后端服务。
+	```
+	// 开启计时时间机制
+	refreshTime := p.devConfig.Backend.RefreshTime
+	t := time.NewTimer(time.Duration(refreshTime) * time.Second)
+	// 先停止计时器
+	t.Stop()
+	for {
+		select {
+		case <-t.C:
+			// 计时器时间到了，代表之前有文件更新事件重置过计时器
+			// 即有文件更新
+			fmt.Println("...检测到文件更新，重启服务开始...")
+			if err := p.rebuildBackend(); err != nil {
+				fmt.Println("重新编译失败：", err.Error())
+			} else {
+				if err := p.restartBackend(); err != nil {
+					fmt.Println("重新启动失败：", err.Error())
+				}
+			}
+			fmt.Println("...检测到文件更新，重启服务结束...")
+			// 停止计时器
+			t.Stop()
+		case _, ok := <-watcher.Events:
+			if !ok {
+				continue
+			}
+			// 有文件更新事件，重置计时器
+			t.Reset(time.Duration(refreshTime) * time.Second)
+		case err, ok := <-watcher.Errors:
+			if !ok {
+				continue
+			}
+			// 如果有文件监听错误，则停止计时器
+			fmt.Println("监听文件夹错误：", err.Error())
+			t.Reset(time.Duration(refreshTime) * time.Second)
+		}
 	}
 	```

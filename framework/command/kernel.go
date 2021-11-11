@@ -16,6 +16,8 @@ func AddKernelCommands(root *cobra.Command) {
 	root.AddCommand(npmCommand)
 	// env 获取环境变量
 	root.AddCommand(initEnvCommand())
+	// dev 调试命令
+	root.AddCommand(initDevCommand())
 
 	//root.AddCommand(DemoCommand)
 
