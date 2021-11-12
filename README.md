@@ -545,32 +545,32 @@ rootCmd.AddCronCommand("* * * * * *", demo.FooCommand)
 	r.Use(static.Serve("/", static.LocalFile("./fcou/dist", false)))
 	```
 	* 完整流程
-		* 1. 安装npm,到node.js官网下载安装node.js,自带npm
+		1. 安装npm,到node.js官网下载安装node.js,自带npm
 		```
 		node -v  //查看版本
 		npm -v
 		```
-		* 2. 安装vue
+		2. 安装vue
 		```
 		npm install vue -g
 		npm install vue-cli -g
 		```
-		* 3. 安装webpack
+		3. 安装webpack
 		```
 		npm install  webpack -g
 		npm install  webpack-cli -g
 		```
-		* 4. 新建项目，创建项目目录，进入此目录的终端
+		4. 新建项目，创建项目目录，进入此目录的终端
 		```
 		vue init webpack my-project   // 创建一个基于 webpack 模板的新项目
 		// 这里需要进行一些配置，默认回车即可
 		```
-		* 5. 进入项目和安装依赖,生成的 index 文件，存放在根目录的 dist 目录下
+		5. 进入项目和安装依赖,生成的 index 文件，存放在根目录的 dist 目录下
 		```
 		npm install   //加载目录所需要的第三方库
 		npm run build //执行 Vue 的编译操作
 		```
-		* 6. 启动项目
+		6. 启动项目
 		```
 		npm run dev
 		```
@@ -685,3 +685,57 @@ rootCmd.AddCronCommand("* * * * * *", demo.FooCommand)
 		}
 	}
 	```
+---
+### 16 自动化：自动化一切重复性劳动
+* 自动化创建服务工具
+	* 命令创建
+		1. ./hade provider 一级命令，provider，打印帮助信息；
+		2. ./hade provider new 二级命令，创建一个服务；
+			* 借助一个第三方库 survey,实现命令行交互的方式
+			* 已注册服务的字符串凭证比较，相同报错
+			* 创建目录
+			* 在目录下创建 contract.go、provider.go、service.go 三个文件
+			* 利用text/template 库，在三个文件中根据预先定义好的模版填充内容
+			```
+			// 创建title这个模版方法
+			funcs := template.FuncMap{"title": strings.Title}
+			{
+				//  创建contract.go
+				file := filepath.Join(pFolder, folder, "contract.go")
+				f, err := os.Create(file)
+				if err != nil {
+					return errors.Cause(err)
+				}
+				// 使用contractTmp模版来初始化template，并且让这个模版支持title方法，即支持{{.|title}}
+				t := template.Must(template.New("contract").Funcs(funcs).Parse(contractTmp))
+				// 将name传递进入到template中渲染，并且输出到contract.go 中
+				if err := t.Execute(f, name); err != nil {
+					return errors.Cause(err)
+				}
+			}
+			template.New() 方法，创建一个 text/template 的 Template 结构，其中的参数 contract 字符串是为这个 Template 结构命名的，后面的 Funcs() 方法是将签名定义的模版函数注册到这个 Template 结构中，最后的 Parse() 是使用这个 Template 结构解析具体的模版文本。
+			```
+		3. ./hade provider list 二级命令，列出容器内的所有服务，列出它们的字符串凭证。
+* 自动化创建命令行工具
+	* 命令创建
+		1. ./hade command 一级命令，显示帮助信息
+		2. ./hade command list 二级命令，列出所有控制台命令
+		3. ./hade command new 二级命令，创建一个控制台命令
+* 自动化中间件迁移工具
+	* 命令创建
+		1. ./hade middleware 一级命令，显示帮助信息
+		2. ./hade middleware list 二级命令，列出所有的业务中间件
+		3. ./hade middleware new 二级命令，创建一个新的业务中间件
+		4. ./hade middleware migrate 二级命令，迁移 Gin 已有的中间件
+			* 参数中获取中间件名称；
+			* 使用 go-git，将对应的 gin-contrib 的项目 clone 到目录 /app/http/middleware；
+				* 从 git 上复制一个项目，在 Golang 中可以使用一个第三方库 go-git
+				```
+				_, err := git.PlainClone("/tmp/foo", false, &git.CloneOptions{
+					URL:      "https://github.com/go-git/go-git",
+					Progress: os.Stdout,
+				})
+				```
+			* 删除不必要的文件 go.mod、go.sum、.git；
+			* 替换关键字 “github.com/gin-gonic/gin”。
+			
