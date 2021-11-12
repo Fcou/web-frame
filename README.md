@@ -738,4 +738,22 @@ rootCmd.AddCronCommand("* * * * * *", demo.FooCommand)
 				```
 			* 删除不必要的文件 go.mod、go.sum、.git；
 			* 替换关键字 “github.com/gin-gonic/gin”。
-			
+* 自动化初始化脚手架设计
+	*  ./hade new 命令，要做的流程
+		1. 下载 github.com/gohade/hade 的某个 release 版本到目标文件夹
+			* go-github。这个库封装了 GitHub 的调用接口。
+			```
+			client := github.NewClient(nil)
+			release, _, err = client.Repositories.GetLatestRelease(context.Background(), "gohade", "hade")
+			```
+			* 在返回的 RepositoryRelease 结构中，我们可以找到下载这个 release 版本的各种信息。其中包括 release 版本对应的版本号信息和 zip 下载地址。
+			* 对于下载 zip 包，直接使用 http.Get 就能下载
+			* 使用 Golang 标准库的 archive/zip，来读取 zip 包中的内容，然后将每个文件都复制到目标目录中
+		2. 删除 framework 目录
+		3. 修改 go.mod 中的模块名称
+		4. 修改 go.mod 中的 require 信息，增加 require github.com/gohade/hade
+		5. 修改所有文件使用业务目录的地方，将原本使用“github.com/Fcou/web-frame/app”  的所有引用改成 “[模块名称]/app”
+	* ./hade new 命令，用户目前输入的三个信息：
+		1. 目录名，最终是“当前执行目录 + 目录名”
+		2. 模块名，最终创建应用的 module
+		3. 版本号，对应的 hade 的 release 版本号

@@ -3,17 +3,22 @@ module github.com/Fcou/web-frame
 go 1.13
 
 require (
+	github.com/AlecAivazis/survey/v2 v2.3.2
 	github.com/cpuguy83/go-md2man/v2 v2.0.1
 	github.com/erikdubbelboer/gspt v0.0.0-20210805194459-ce36a5128377
 	github.com/fsnotify/fsnotify v1.5.1
 	github.com/gin-contrib/sse v0.1.0
+	github.com/go-git/go-git/v5 v5.4.2
 	github.com/go-playground/validator/v10 v10.9.0
 	github.com/golang/protobuf v1.5.2
+	github.com/google/go-github/v39 v39.2.0
 	github.com/google/uuid v1.1.2
 	github.com/inconshreveable/mousetrap v1.0.0
+	github.com/jianfengye/collection v1.3.2
 	github.com/jonboulle/clockwork v0.2.2 // indirect
 	github.com/json-iterator/go v1.1.12
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0 // indirect
+	github.com/kr/pretty v0.3.0
 	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible
 	github.com/lestrrat-go/strftime v1.0.5 // indirect
 	github.com/mattn/go-isatty v0.0.14
