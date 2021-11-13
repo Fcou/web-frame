@@ -689,8 +689,8 @@ rootCmd.AddCronCommand("* * * * * *", demo.FooCommand)
 ### 16 自动化：自动化一切重复性劳动
 * 自动化创建服务工具
 	* 命令创建
-		1. ./hade provider 一级命令，provider，打印帮助信息；
-		2. ./hade provider new 二级命令，创建一个服务；
+		1. ./fcou provider 一级命令，provider，打印帮助信息；
+		2. ./fcou provider new 二级命令，创建一个服务；
 			* 借助一个第三方库 survey,实现命令行交互的方式
 			* 已注册服务的字符串凭证比较，相同报错
 			* 创建目录
@@ -715,18 +715,18 @@ rootCmd.AddCronCommand("* * * * * *", demo.FooCommand)
 			}
 			template.New() 方法，创建一个 text/template 的 Template 结构，其中的参数 contract 字符串是为这个 Template 结构命名的，后面的 Funcs() 方法是将签名定义的模版函数注册到这个 Template 结构中，最后的 Parse() 是使用这个 Template 结构解析具体的模版文本。
 			```
-		3. ./hade provider list 二级命令，列出容器内的所有服务，列出它们的字符串凭证。
+		3. ./fcou provider list 二级命令，列出容器内的所有服务，列出它们的字符串凭证。
 * 自动化创建命令行工具
 	* 命令创建
-		1. ./hade command 一级命令，显示帮助信息
-		2. ./hade command list 二级命令，列出所有控制台命令
-		3. ./hade command new 二级命令，创建一个控制台命令
+		1. ./fcou command 一级命令，显示帮助信息
+		2. ./fcou command list 二级命令，列出所有控制台命令
+		3. ./fcou command new 二级命令，创建一个控制台命令
 * 自动化中间件迁移工具
 	* 命令创建
-		1. ./hade middleware 一级命令，显示帮助信息
-		2. ./hade middleware list 二级命令，列出所有的业务中间件
-		3. ./hade middleware new 二级命令，创建一个新的业务中间件
-		4. ./hade middleware migrate 二级命令，迁移 Gin 已有的中间件
+		1. ./fcou middleware 一级命令，显示帮助信息
+		2. ./fcou middleware list 二级命令，列出所有的业务中间件
+		3. ./fcou middleware new 二级命令，创建一个新的业务中间件
+		4. ./fcou middleware migrate 二级命令，迁移 Gin 已有的中间件
 			* 参数中获取中间件名称；
 			* 使用 go-git，将对应的 gin-contrib 的项目 clone 到目录 /app/http/middleware；
 				* 从 git 上复制一个项目，在 Golang 中可以使用一个第三方库 go-git
@@ -739,24 +739,24 @@ rootCmd.AddCronCommand("* * * * * *", demo.FooCommand)
 			* 删除不必要的文件 go.mod、go.sum、.git；
 			* 替换关键字 “github.com/gin-gonic/gin”。
 * 自动化初始化脚手架设计
-	*  ./hade new 命令，要做的流程
-		1. 下载 github.com/gohade/hade 的某个 release 版本到目标文件夹
+	*  ./fcou new 命令，要做的流程
+		1. 下载 github.com/gofcou/fcou 的某个 release 版本到目标文件夹
 			* go-github。这个库封装了 GitHub 的调用接口。
 			```
 			client := github.NewClient(nil)
-			release, _, err = client.Repositories.GetLatestRelease(context.Background(), "gohade", "hade")
+			release, _, err = client.Repositories.GetLatestRelease(context.Background(), "gofcou", "fcou")
 			```
 			* 在返回的 RepositoryRelease 结构中，我们可以找到下载这个 release 版本的各种信息。其中包括 release 版本对应的版本号信息和 zip 下载地址。
 			* 对于下载 zip 包，直接使用 http.Get 就能下载
 			* 使用 Golang 标准库的 archive/zip，来读取 zip 包中的内容，然后将每个文件都复制到目标目录中
 		2. 删除 framework 目录
 		3. 修改 go.mod 中的模块名称
-		4. 修改 go.mod 中的 require 信息，增加 require github.com/gohade/hade
+		4. 修改 go.mod 中的 require 信息，增加 require github.com/gofcou/fcou
 		5. 修改所有文件使用业务目录的地方，将原本使用“github.com/Fcou/web-frame/app”  的所有引用改成 “[模块名称]/app”
-	* ./hade new 命令，用户目前输入的三个信息：
+	* ./fcou new 命令，用户目前输入的三个信息：
 		1. 目录名，最终是“当前执行目录 + 目录名”
 		2. 模块名，最终创建应用的 module
-		3. 版本号，对应的 hade 的 release 版本号
+		3. 版本号，对应的 fcou 的 release 版本号
 ---
 ### 17 管理接口：集成swagger
 * swagger介绍
@@ -767,7 +767,7 @@ rootCmd.AddCronCommand("* * * * * *", demo.FooCommand)
 	* 我们的目标是生成一个可以查看接口，进行调用调试的页面，所以要将 swagger-ui 集成进框架。
 * 分析需求
 	* 痛点: 按照 swagger 的定义，我们应该在业务项目中维护一个 JSON 文件，这个文件描述了这个业务的所有接口。但是你想过没有，随着项目的接口数越来越大，维护 swagger 的 JSON 描述文档本身，就是一个很大很繁杂的工作量。
-	* 解决：定义的一个 swagger 命令，./hade swagger gen ，能通过注释生成 swagger.json 文件
+	* 解决：定义的一个 swagger 命令，./fcou swagger gen ，能通过注释生成 swagger.json 文件
 	* 工具：有一个最流行的将 Golang 注释转化为 swagger.json 的开源项目swag
 * swag库，生成 swagger.json 分三步：
 	1. 在 API 接口中编写注释。注释的详细写法需要参考说明文档。
@@ -804,7 +804,7 @@ rootCmd.AddCronCommand("* * * * * *", demo.FooCommand)
 	Name string `json:"name"`
 	}
 	```
-* 实现生成 JSON 文件的命令 ./hade swagger gen
+* 实现生成 JSON 文件的命令 ./fcou swagger gen
 	* 在我们的命令中集成 swaggo 类库：swag/gen,这个类库最核心的结构就是Config 结构
 		* SearchDir 表示要 swaggo 去哪个目录遍历代码的注释，来生成 swagger 的 JSON 文件
 		* OutputDir，表示要输出的 swagger 文件的存放地址
@@ -814,3 +814,46 @@ rootCmd.AddCronCommand("* * * * * *", demo.FooCommand)
 	* swaggo 开发了一个gin-swagger 中间件，来为 Gin 框架增加路由设置。
 		* gin-swagger 原理分析
 		* gin-swagger 如何集成
+---
+### 18 管理进程：设计完善的运行命令
+* 运行命令的设计
+	* ./fcou app start 二级命令，启动一个 app 服务
+	* ./fcou app state 二级命令，获取启动的 app 的信息
+	* ./fcou app stop 二级命令，停止已经启动的 app 服务
+	* ./fcou app restart 二级命令，重新启动一个 app 服务
+* 启动进程命令 start
+	1. 启动服务的监听地址
+	2. 参数 daemon，标记是使用哪种方式启动
+		* 一种是启动后直接挂在控制台，这种启动方式适合调试开发使用；
+		* 而另外一种，以守护进程 daemon 的方式启动，直接挂载在后台，使用开源库 go-daemon
+	3. 启动服务时需要的记录文件
+		* 进程 PID
+		* 日志
+	4. 自定义它的进程名称，可以使用一个第三方库 gspt
+	```
+	实现步骤：
+	从四个方式获取参数 appAddress
+	获取参数 daemon
+	确认 runtime 目录和 PID 文件存在
+	确认 log 目录的 log 文件存在
+	判断是否是 daemon 方式。如果是，就使用 go-daemon 来启动一个子进程；如果不是，直接进行后续调用
+	使用 gspt 来设置当前进程名称
+	启动 app 服务
+	```
+* 获取进程pid信息
+	* app/storage/runtime/app.pid，读取这个文件就可以获取到进程的 PID 信息了
+	```
+	如何根据 PID 查询一个进程是否存在呢？常用的比如 Linux 的 ps 和 grep 命令，基本上都是通过 Linux 的其他命令来检查输出，但最为可靠的方式是直接使用信号对接要查询的进程：通过给进程发送信号来检测，这个信号就是信号 0。
+	```
+* 停止进程命令
+	1. 获取 PID 
+	2. 将内容转换为 PID 的 int 类型，转换失败则什么都不做
+	3. 直接给这个 PID 进程发送 SIGTERM 信号
+	4. 将 PID 文件内容清空
+* 重启进程命令
+	判断旧进程存在之后详细的实现步骤，由于新、旧进程都是使用同一个端口，所以必须保证旧进程结束，才能启动新的进程
+	1. 发送 SIGTERM 信号
+	2. 循环 2*closeWait 次数，每秒执行一次查询进程是否已经结束
+	3. 如果某次查询进程已经结束，或者等待 2*closeWait 循环结束之后，再次查询一次进程
+	4. 如果还未结束，返回进程结束失败
+	5. 如果已经结束，将 PID 文件清空，启动新进程

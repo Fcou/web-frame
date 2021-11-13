@@ -43,9 +43,9 @@ var providerListCommand = &cobra.Command{
 	Short: "列出容器内的所有服务",
 	RunE: func(c *cobra.Command, args []string) error {
 		container := c.GetContainer()
-		hadeContainer := container.(*framework.HadeContainer)
+		fcouContainer := container.(*framework.HadeContainer)
 		// 获取字符串凭证
-		list := hadeContainer.NameList()
+		list := fcouContainer.NameList()
 		// 打印
 		for _, line := range list {
 			println(line)

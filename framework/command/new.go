@@ -81,7 +81,7 @@ var newCommand = &cobra.Command{
 			}
 		}
 		{
-			// 获取hade的版本
+			// 获取fcou的版本
 			client := github.NewClient(nil)
 			prompt := &survey.Input{
 				Message: "请输入版本名称(参考 https://github.com/Fcou/web-frame/releases，默认为最新版本)：",
@@ -92,14 +92,14 @@ var newCommand = &cobra.Command{
 			}
 			if version != "" {
 				// 确认版本是否正确
-				release, _, err = client.Repositories.GetReleaseByTag(context.Background(), "gohade", "hade", version)
+				release, _, err = client.Repositories.GetReleaseByTag(context.Background(), "gofcou", "fcou", version)
 				if err != nil || release == nil {
 					fmt.Println("版本不存在，创建应用失败，请参考 https://github.com/Fcou/web-frame/releases")
 					return nil
 				}
 			}
 			if version == "" {
-				release, _, err = client.Repositories.GetLatestRelease(context.Background(), "gohade", "hade")
+				release, _, err = client.Repositories.GetLatestRelease(context.Background(), "gofcou", "fcou")
 				version = release.GetTagName()
 			}
 		}
@@ -107,9 +107,9 @@ var newCommand = &cobra.Command{
 		fmt.Println("开始进行创建应用操作")
 		fmt.Println("创建目录：", folder)
 		fmt.Println("应用名称：", mod)
-		fmt.Println("hade框架版本：", release.GetTagName())
+		fmt.Println("fcou框架版本：", release.GetTagName())
 
-		templateFolder := filepath.Join(currentPath, "template-hade-"+version+"-"+cast.ToString(time.Now().Unix()))
+		templateFolder := filepath.Join(currentPath, "template-fcou-"+version+"-"+cast.ToString(time.Now().Unix()))
 		os.Mkdir(templateFolder, os.ModePerm)
 		fmt.Println("创建临时目录", templateFolder)
 
@@ -126,14 +126,14 @@ var newCommand = &cobra.Command{
 			return err
 		}
 
-		// 获取folder下的gohade-hade-xxx相关解压目录
+		// 获取folder下的gofcou-fcou-xxx相关解压目录
 		fInfos, err := ioutil.ReadDir(templateFolder)
 		if err != nil {
 			return err
 		}
 		for _, fInfo := range fInfos {
 			// 找到解压后的文件夹
-			if fInfo.IsDir() && strings.Contains(fInfo.Name(), "gohade-hade-") {
+			if fInfo.IsDir() && strings.Contains(fInfo.Name(), "gofcou-fcou-") {
 				if err := os.Rename(filepath.Join(templateFolder, fInfo.Name()), folder); err != nil {
 					return err
 				}
@@ -165,8 +165,8 @@ var newCommand = &cobra.Command{
 
 			if path == filepath.Join(folder, "go.mod") {
 				fmt.Println("更新文件:" + path)
-				c = bytes.ReplaceAll(c, []byte("module github.com/gohade/hade"), []byte("module "+mod))
-				c = bytes.ReplaceAll(c, []byte("require ("), []byte("require (\n\tgithub.com/gohade/hade "+version))
+				c = bytes.ReplaceAll(c, []byte("module github.com/gofcou/fcou"), []byte("module "+mod))
+				c = bytes.ReplaceAll(c, []byte("require ("), []byte("require (\n\tgithub.com/gofcou/fcou "+version))
 				err = ioutil.WriteFile(path, c, 0644)
 				if err != nil {
 					return err

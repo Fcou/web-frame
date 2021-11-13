@@ -124,8 +124,8 @@ var SwaggerInfo = swaggerInfo{
 	Host:        "",
 	BasePath:    "/",
 	Schemes:     []string{},
-	Title:       "hade",
-	Description: "hade测试",
+	Title:       "fcou",
+	Description: "fcou测试",
 }
 
 type s struct{}

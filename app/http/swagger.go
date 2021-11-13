@@ -1,7 +1,7 @@
 // Package http API.
-// @title hade
+// @title fcou
 // @version 1.1
-// @description hade测试
+// @description fcou测试
 // @termsOfService https://github.com/swaggo/swag
 
 // @contact.name yejianfeng1
