@@ -757,3 +757,60 @@ rootCmd.AddCronCommand("* * * * * *", demo.FooCommand)
 		1. 目录名，最终是“当前执行目录 + 目录名”
 		2. 模块名，最终创建应用的 module
 		3. 版本号，对应的 hade 的 release 版本号
+---
+### 17 管理接口：集成swagger
+* swagger介绍
+	* 项目最终成型的方案是，先设计一个 JSON 规则，开发工程师把所有服务接口按照这种规则来写成一个 JSON 文件，这个 JSON 文件可以直接生成一个交互式 UI，可以提供调用者查看、调用调试。
+	* 产品分为两类
+		1.  JSON 规则，就是 OpenAPI 的文档，它说明了我们要写一个接口说明文档的每个字段含义和要求
+		2. 工具，包括 swagger-ui、swagger-editor 和 swagger-codegen。
+	* 我们的目标是生成一个可以查看接口，进行调用调试的页面，所以要将 swagger-ui 集成进框架。
+* 分析需求
+	* 痛点: 按照 swagger 的定义，我们应该在业务项目中维护一个 JSON 文件，这个文件描述了这个业务的所有接口。但是你想过没有，随着项目的接口数越来越大，维护 swagger 的 JSON 描述文档本身，就是一个很大很繁杂的工作量。
+	* 解决：定义的一个 swagger 命令，./hade swagger gen ，能通过注释生成 swagger.json 文件
+	* 工具：有一个最流行的将 Golang 注释转化为 swagger.json 的开源项目swag
+* swag库，生成 swagger.json 分三步：
+	1. 在 API 接口中编写注释。注释的详细写法需要参考说明文档。
+	2. 下载 swag 工具或者安装 swag 库
+	3. 使用工具或者库将指定代码生成 swagger.json
+* 怎么写 swag 的注释说明文档
+	* Summary，为接口增加简要说明
+	* Description，为接口增加详细说明
+	* Produce，说明接口返回格式
+	* Tags，为接口打标签，可以为多个，便于查看者查找
+	* Success，接口返回成功时候的说明
+		* 如果你的返回结构放在不同的 namespace 下，需要在注释中注明返回结构的命名空间
+			* // @Success 200 {array} model.Account
+		* 这个返回结构还支持返回对象嵌套
+			* // 返回了一个JsonResult对象，其中这个对象的data字段是Order结构@success * 200 {object} jsonresult.JSONResult{data=proto.Order} "desc"
+	* Router，接口的路由调用
+	```
+	// Demo2  for godoc
+	// @Summary 获取所有学生
+	// @Description 获取所有学生，不进行分页
+	// @Produce  json
+	// @Tags demo
+	// @Success 200 {array} []UserDTO
+	// @Router /demo/demo2 [get]
+	func (api *DemoApi) Demo2(c *gin.Context) {
+	demoProvider := c.MustMake(demoService.DemoKey).(demoService.IService)
+	students := demoProvider.GetAllStudent()
+	usersDTO := StudentsToUserDTOs(students)
+	c.JSON(200, usersDTO)
+	}
+
+	type UserDTO struct {
+	ID   int    `json:"id"`
+	Name string `json:"name"`
+	}
+	```
+* 实现生成 JSON 文件的命令 ./hade swagger gen
+	* 在我们的命令中集成 swaggo 类库：swag/gen,这个类库最核心的结构就是Config 结构
+		* SearchDir 表示要 swaggo 去哪个目录遍历代码的注释，来生成 swagger 的 JSON 文件
+		* OutputDir，表示要输出的 swagger 文件的存放地址
+		* MainAPIFile，表示整个 swagger 接口的说明文档
+* 启动 swagger-ui
+	* 有了 swagger 生成文件了,在启动服务的时候，增加一个打开 swagger-ui 页面路由
+	* swaggo 开发了一个gin-swagger 中间件，来为 Gin 框架增加路由设置。
+		* gin-swagger 原理分析
+		* gin-swagger 如何集成

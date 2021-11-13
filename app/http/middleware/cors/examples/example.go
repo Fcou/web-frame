@@ -3,8 +3,8 @@ package main
 import (
 	"time"
 
+	"github.com/Fcou/web-frame/framework/gin"
 	"github.com/gin-contrib/cors"
-	"github.com/gohade/hade/framework/gin"
 )
 
 func main() {

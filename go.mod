@@ -7,6 +7,7 @@ require (
 	github.com/cpuguy83/go-md2man/v2 v2.0.1
 	github.com/erikdubbelboer/gspt v0.0.0-20210805194459-ce36a5128377
 	github.com/fsnotify/fsnotify v1.5.1
+	github.com/gin-contrib/cors v1.3.1
 	github.com/gin-contrib/sse v0.1.0
 	github.com/go-git/go-git/v5 v5.4.2
 	github.com/go-playground/validator/v10 v10.9.0
@@ -33,6 +34,9 @@ require (
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.9.0
 	github.com/stretchr/testify v1.7.0
+	github.com/swaggo/gin-swagger v1.3.3
+	github.com/swaggo/swag v1.7.4
 	github.com/ugorji/go/codec v1.2.6
+	golang.org/x/net v0.0.0-20210503060351-7fd8e65b6420
 	gopkg.in/yaml.v2 v2.4.0
 )

@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gohade/hade/framework/gin"
+	"github.com/Fcou/web-frame/framework/gin"
 	"github.com/stretchr/testify/assert"
 )
 

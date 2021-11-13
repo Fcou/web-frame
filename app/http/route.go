@@ -1,10 +1,10 @@
 package http
 
 import (
+	"github.com/Fcou/web-frame/app/http/middleware/cors"
 	"github.com/Fcou/web-frame/app/http/module/demo"
 	"github.com/Fcou/web-frame/framework/gin"
 	"github.com/Fcou/web-frame/framework/middleware/static"
-	"github.com/gohade/hade/app/http/middleware/cors"
 )
 
 // Routes 绑定业务层路由
