@@ -455,7 +455,7 @@ rootCmd.AddCronCommand("* * * * * *", demo.FooCommand)
 	多个进程同时使用 os.OpenFile 打开一个文件，并使用 syscall.Flock 带上 syscall.LOCK_EX 参数来对这个文件加文件锁，这里只会有一个进程抢占到文件锁，而其他抢占不到的进程从 syscall.Flock 函数中获取到的就是 error。根据这个 error 是否为空，我们就能判断是否抢占到了文件锁。
 	```
 	* 现在有了分布式选择器，就可以实现分布式调度了。我们为 Command 结构增加一个方法 AddDistributedCronCommand,它的实现和 AddCronCommand 差不多，唯一的区别就是在封装 cron.AddFunc 的匿名函数中，运行目标命令之前，要做一次分布式选举，如果被选举上了，才执行目标命令。
-### 12｜配置和环境：配置服务中的设计思路
+### 12 配置和环境：配置服务中的设计思路
 * 业务中有大量的配置项，比如数据库的用户名密码、缓存 Redis 的 IP 和端口、第三方调用的地址等。如何通过统一的方法快速获取到这些配置项。获取配置项的方法有很多，例如以下三种：
 	* 读取本地配置文件
 	* 读取远端配置服务
@@ -528,7 +528,7 @@ rootCmd.AddCronCommand("* * * * * *", demo.FooCommand)
 	* 在打印日志的时候从 context 中获取全链路字段序列化进入日志
 	* 在发送请求的时候将全链路字段加入到 request 中
 ---
-### 14:前后端一体化的架构方案
+### 14 前后端一体化的架构方案
 * 前后端分离的架构经常是，Nginx 作为网关，前端页面作为 Nginx 的一个 location 路由，而后端接口作为 Nginx 的另外一个 location 路由
 	* 优点: 模块化，前端、后端、网关是独立模块，互相不干扰。
 	* 缺点: 复杂度高一些，而且一旦在网关层增加逻辑，因为语言异构，网关层逻辑和业务层逻辑不是一个，开发起来会十分痛苦。
@@ -857,3 +857,101 @@ rootCmd.AddCronCommand("* * * * * *", demo.FooCommand)
 	3. 如果某次查询进程已经结束，或者等待 2*closeWait 循环结束之后，再次查询一次进程
 	4. 如果还未结束，返回进程结束失败
 	5. 如果已经结束，将 PID 文件清空，启动新进程
+---
+### 19 数据库服务：基于GORM实现封装
+```
+	dsn := "xxxxxxx"
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+```
+* GORM的实现原理，Gorm 封装的 database/sql 的两个关键步骤：
+	1. sql.Open
+	2. db.ExecContext
+*  Gorm 封装为一个服务,  type DBConfig struct {}代表数据库连接的所有配置，集合了三部分：
+	1. 配置关于dsn
+	2. 配置关于连接池
+	3. 配置关于gorm
+---
+### 20 缓存服务：基于Redis实现封装
+* 首先封装一个可以对 Redis 进行操作的服务。和封装 ORM 一样，我们自己并不实现 Redis 的底层传输协议和操作封装，只将 Redis“创建连接”的过程封装在 fcou 中就行.
+	* 选择go-redis这个库来实现对 Redis 的连接
+	* 核心的 redis.NewClient 方法，返回的是一个 *redis.Client 结构，它就相当于 Gorm 中的 DB 数据结构，就是我们要实例化 Redis 的实例。
+	```
+	import (
+		"context"
+		"github.com/go-redis/redis/v8"
+	)
+
+	var ctx = context.Background()
+
+	func ExampleClient() {
+		// 创建连接
+		rdb := redis.NewClient(&redis.Options{
+			Addr:     "localhost:6379",
+			Password: "", // no password set
+			DB:       0,  // use default DB
+		})
+
+		...
+	}
+	```
+* 给用户提供一个配置即用的缓存服务，需要做如下三个事情：
+	1. 自定义一个数据结构，封装 redis.Options 结构
+		* 配置,相当于 Gorm 中的 gorm.Config
+		```
+		// redis的连接配置
+		type Options struct {
+		// 网络情况
+		// Default is tcp.
+		Network string
+		// host:port 格式的地址
+		Addr string
+		
+		// redis的用户名
+		Username string
+		// redis密码
+		Password string
+		// redis的database
+		DB int
+		
+		// 连接超时
+		// Default is 5 seconds.
+		DialTimeout time.Duration
+		// 读超时
+		// Default is 3 seconds.
+		ReadTimeout time.Duration
+		// 写超时
+		// Default is ReadTimeout.
+		WriteTimeout time.Duration
+		
+		// 最小空闲连接数
+		MinIdleConns int
+		// 最大连接时长
+		MaxConnAge time.Duration
+		
+		// 空闲连接时长
+		// Default is 5 minutes. -1 disables idle timeout check.
+		IdleTimeout time.Duration
+		...
+		}
+	2. 让刚才自定义的结构能生成一个唯一标识（类似 Gorm 的 DSN）
+		* 选用 Addr、DB、UserName、Network 四个字段值来标识。基本上这四个字段加起来能标识“用什么账号登录哪个 Redis 地址的哪个 database”
+		```
+		// UniqKey 用来唯一标识一个RedisConfig配置
+		func (config *RedisConfig) UniqKey() string {
+		return fmt.Sprintf("%v_%v_%v_%v", config.Addr, config.DB, config.Username, config.Network)
+		}
+		```
+	3. 支持通过配置文件加载这个结构，同时，支持通过 Option 可变参数来修改它。提供多层次的修改方案，包括默认配置、按照配置项进行配置，以及手动配置：
+		* GetBaseConfig 获取 redis.yaml 根目录下的 Redis 配置，作为默认配置
+		* GetConfigPath 根据指定配置路径获取 Redis 配置
+		* WithRedisConfig 可以直接修改 RedisConfig 中的 redis.Options 配置信息
+* 实现缓存服务
+	1. 设计缓存协议
+		* 一个服务的接口设计，就是一个“我们想要什么服务”的思考过程
+		* 缓存的使用有一种 Cache-Aside 模式：
+			* 先从缓存查询数据
+			* 如果没有命中缓存则从数据存储查询
+			* 将数据写入缓存
+	2. 实现缓存协议
+		* 框架支持内存和 Redis 实现缓存，由于缓存有不同实现，所以和日志服务一样，要使用配置文件来 cache.yaml 中的 driver 字段，来区别使用哪个缓存。
+

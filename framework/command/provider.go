@@ -43,7 +43,7 @@ var providerListCommand = &cobra.Command{
 	Short: "列出容器内的所有服务",
 	RunE: func(c *cobra.Command, args []string) error {
 		container := c.GetContainer()
-		fcouContainer := container.(*framework.HadeContainer)
+		fcouContainer := container.(*framework.FcouContainer)
 		// 获取字符串凭证
 		list := fcouContainer.NameList()
 		// 打印
@@ -84,7 +84,7 @@ var providerCreateCommand = &cobra.Command{
 		}
 
 		// 检查服务是否存在
-		providers := container.(*framework.HadeContainer).NameList()
+		providers := container.(*framework.FcouContainer).NameList()
 		providerColl := collection.NewStrCollection(providers)
 		if providerColl.Contains(name) {
 			fmt.Println("服务名称已经存在")

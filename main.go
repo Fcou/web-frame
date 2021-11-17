@@ -8,6 +8,7 @@ import (
 	"github.com/Fcou/web-frame/framework/provider/distributed"
 	"github.com/Fcou/web-frame/framework/provider/env"
 	"github.com/Fcou/web-frame/framework/provider/kernel"
+	"github.com/Fcou/web-frame/framework/provider/orm"
 )
 
 func main() {
@@ -19,6 +20,8 @@ func main() {
 	container.Bind(&distributed.LocalDistributedProvider{})
 	// 绑定环境变量服务（目前有问题）
 	container.Bind(&env.FcouEnvProvider{})
+	// 绑定orm服务
+	container.Bind(&orm.GormProvider{})
 	// 绑定配置服务
 	// container.Bind(&config.FcouConfigProvider{})
 	// 绑定日志服务
