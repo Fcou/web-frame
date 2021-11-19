@@ -954,4 +954,39 @@ rootCmd.AddCronCommand("* * * * * *", demo.FooCommand)
 			* 将数据写入缓存
 	2. 实现缓存协议
 		* 框架支持内存和 Redis 实现缓存，由于缓存有不同实现，所以和日志服务一样，要使用配置文件来 cache.yaml 中的 driver 字段，来区别使用哪个缓存。
-
+---
+### 21 SSH：发布自动化
+* 发布自动化，不是一个框架的刚需，有很多方式可以将一个服务进行自动化部署。
+	* 比如现在比较流行的 Docker 化或者 CI/CD 流程，这些部署流程往往都太庞大了
+	* 所有的部署自动化工具，基本都依赖本地与远端服务器的连接，这个连接可以是 FTP，可以是 HTTP，但是更经常的连接是 SSH 连接。
+	* 本框架的自动化发布系统也是依赖 SSH 的，简单
+* SSH 服务
+	* golang.org/x/crypto/ssh库能完成 SSH 的远端连接。
+* 自动化部署的命令设计
+	* ./fcou deploy frontend ，部署前端
+		1. 创建部署文件夹
+		2. 编译前端到部署文件夹
+			* 编译前端 buildFrontendCommand.RunE(c, []string{})
+			* 复制前端文件到deploy文件夹
+		3. 上传部署文件夹并执行对应的shell
+			* 执行前置命令
+				* 创建session
+				* 执行命令 session.CombinedOutput(action)
+			* 上传部署文件夹
+				* 遍历本地文件
+				* 打开本地的文件 rf, err := os.Open(filepath.Join(localFolder, relPath))
+				* 打开/创建远端文件 f, err := client.Create(filepath.Join(remoteFolder, relPath))
+				* 将本地文件并发读取到远端文件 if _, err := f.ReadFromWithConcurrency(rf, 10); err != nil 
+			* 执行后置命令
+	* ./fcou  deploy backend ，部署后端
+		* 编译 Golang 的后端需要指定对应的编译平台和编译 CPU 架构
+		1. 创建部署文件夹
+		2. 编译后端到部署文件夹
+		3. 上传部署文件夹并执行对应的shell
+	* ./fcou deploy all ，同时部署前后端
+		1. 编译前端
+		2. 编译后端
+		3. 上传前端+后端，并执行对应的shell
+	* ./fcou deploy rollback ，部署回滚
+		* 需要传递的参数： 回滚版本号（部署目录的名称） + 标记(前、后端、全部)
+		1. 把回滚版本所在目录的编译结果，上传到目标服务器

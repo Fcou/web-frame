@@ -3,7 +3,7 @@ package contract
 // AppKey 定义字符串凭证
 const AppKey = "fcou:app"
 
-// App 定义接口, 核心业务
+// App 定义接口
 type App interface {
 	// AppID 表示当前这个app的唯一id, 可以用于分布式锁等
 	AppID() string
@@ -26,6 +26,8 @@ type App interface {
 	RuntimeFolder() string
 	// TestFolder 存放测试所需要的信息
 	TestFolder() string
+	// DeployFolder 存放部署的时候创建的文件夹
+	DeployFolder() string
 
 	// AppFolder 定义业务代码所在的目录，用于监控文件变更使用
 	AppFolder() string

@@ -149,3 +149,11 @@ func (app *FcouApp) AppFolder() string {
 	}
 	return filepath.Join(app.BaseFolder(), "app")
 }
+
+// DeployFolder 定义测试需要的信息
+func (app *FcouApp) DeployFolder() string {
+	if val, ok := app.configMap["deploy_folder"]; ok {
+		return val
+	}
+	return filepath.Join(app.BaseFolder(), "deploy")
+}
