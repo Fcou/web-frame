@@ -379,8 +379,8 @@ github.com/jackc/puddle v1.1.3/go.mod h1:m4B5Dj62Y0fbyuIc15OsIqK0+JU8nkqQjsgx7dv
 github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 h1:BQSFePA1RWJOlocH6Fxy8MmwDt+yVQYULKfN0RoTN8A=
 github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99/go.mod h1:1lJo3i6rXxKeerYnT8Nvf0QmHCRC1n8sfWVwXF2Frvo=
 github.com/jessevdk/go-flags v1.5.0/go.mod h1:Fw0T6WPc1dYxT4mKEZRfG5kJhaTDP9pj1c2EWnYs/m4=
-github.com/jianfengye/collection v1.3.2 h1:3aGq/v2i9FZURFG4MJJTzxiqvLef/cL1c2dO+HzLpJQ=
-github.com/jianfengye/collection v1.3.2/go.mod h1:Oi7o4E0BF3Z8K8ql/Aa/O10/4ooirgGw+8JLQe+O3lQ=
+github.com/fcourage/collection v1.3.2 h1:3aGq/v2i9FZURFG4MJJTzxiqvLef/cL1c2dO+HzLpJQ=
+github.com/fcourage/collection v1.3.2/go.mod h1:Oi7o4E0BF3Z8K8ql/Aa/O10/4ooirgGw+8JLQe+O3lQ=
 github.com/jinzhu/inflection v1.0.0 h1:K317FqzuhWc8YvSVlFMCCUb36O/S9MCKRDI7QkRKD/E=
 github.com/jinzhu/inflection v1.0.0/go.mod h1:h+uFLlag+Qp1Va5pdKtLDYj+kHp5pxUVkryuEj+Srlc=
 github.com/jinzhu/now v1.1.2 h1:eVKgfIdy9b6zbWBMgFpfDPoAMifwSZagU9HmEU6zgiI=

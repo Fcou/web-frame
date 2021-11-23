@@ -13,7 +13,7 @@ import (
 	"github.com/Fcou/web-frame/framework/contract"
 	"github.com/Fcou/web-frame/framework/util"
 
-	"github.com/jianfengye/collection"
+	"github.com/fcourage/collection"
 	"github.com/pkg/errors"
 )
 

@@ -990,3 +990,117 @@ rootCmd.AddCronCommand("* * * * * *", demo.FooCommand)
 	* ./fcou deploy rollback ，部署回滚
 		* 需要传递的参数： 回滚版本号（部署目录的名称） + 标记(前、后端、全部)
 		1. 把回滚版本所在目录的编译结果，上传到目标服务器
+---
+### 22 周边：框架发布和维护
+* 版本
+	* 三段式的版本规范：主版本号.次版本号.修订号
+	* 主版本号代表如果做了不兼容的 API 修改
+	* 次版本号表示当你做了向下兼容的功能性新增
+	* 修改号，表示当你做了向下兼容的问题修正
+* 发布
+	1. 在工作机器上安装 fcou 命令，我们可以在任何路径调用
+	```
+	go install github.com/gofcou/fcou@latest
+	```
+	2. 直接调用 $GOPATH/bin/fcou 可以看到安装好的 fcou 命令,使用 fcou new 命令创建一个项目，比如为 hellofcou
+	3. 进入目标文件夹 cd hellofcou ，调用  go mod tidy 下载所有的依赖包，调用  go build 编译目录
+	4. 使用者就可以在这个目标文件夹中开始基于 fcou 开发应用了
+* 文档维护
+	* 使用 markdown 编写说明文档，然后如果能自动将这些 markdown 文档转化为 HTML 网站，再将网站部署到服务器上
+	```
+	vuepress 是一个 Vue 工具，基于 Vue 框架生成了一个 vuepress 的命令行工具，这个工具能将指定的 markdown 文件转化为 HTML 文件，而这个 HTML 文件是可以直接被使用者访问的。
+	```
+	1. 编写 markdown, [vuepress介绍](https://vuepress.vuejs.org/zh/guide/)
+	```
+	我们在根目录下创建 docs 目录，存放编写的 markdown 文件
+	需要在 docs 目录下创建一个.vuepress/config.js ，来给 vuepress 工具阅读
+	module.exports = {
+		title: "fcou框架", // 设置网站标题
+		description: "一个支持前后端开发的基于协议的框架", //描述
+		dest: "./dist/", // 设置输出目录
+		port: 2333, //端口
+		base: "/v1.0/",
+		head: [["link", {rel: "icon", href: "/assets/img/head.png"}]],
+		themeConfig: {
+			//主题配置
+			// logo: "/assets/img/head.png",
+			// 添加导航栏
+			nav: [
+				{text: "主页", link: "/"}, // 导航条
+				{text: "使用文档", link: "/guide/"},
+				{text: "服务提供者", link: "/provider/"},
+				{
+					text: "github",
+					// 这里是下拉列表展现形式。
+					items: [
+						{
+							text: "fcou",
+							link: "https://github.com/gofcou/fcou",
+						},
+					],
+				},
+			],
+			// 为以下路由添加侧边栏
+			sidebar: {
+				"/guide/": [
+					{
+						title: "指南",
+						collapsable: false,
+						children: [
+							"introduce",
+							"install",
+							"build",
+							"structure",
+							"app",
+							"env",
+							"dev",
+							"command",
+							"cron",
+							"middleware",
+							"swagger",
+							"provider",
+							"todo",
+						],
+					},
+				],
+				"/provider/": [
+					{
+						title: "服务提供者",
+						collapsable: false,
+						children: [
+							"app",
+							"env",
+							"config",
+							"log",
+						],
+					},
+				],
+			},
+		},
+	};
+	```
+	2. 生成 HTML
+	* docs 下的 markdown 文件都编写完成了，下面我们就安装 vuepress 并且生成 HTML。安装 vuepress，只需要使用 npm 命令：
+	```
+	npm install -D vuepress
+	```
+	* 使用  npm run docs:build ，就能生成对应 markdown 的 HTML 
+	3. 最后将这个 HTML 文件部署到 Web 服务器中。这里我们部署在目标服务器的的 /webroot/fcou_doc/dist_1.0 目录中
+	4. 我们的目标服务器配置的 Web 服务器为 Nginx，Nginx 如何配置
+	```
+    server {
+        server_name  fcou.funaio.cn;
+        access_log  logs/fcou.access.log  main;
+        error_log  logs/fcou.error.log ;
+
+        location /v1.0/ {
+            alias /webroot/fcou_doc/dist_1.0/;
+            index  index.html index.htm;
+        }
+
+        location / {
+            root   /webroot/fcou_doc/dist_1.0/;
+            index  index.html index.htm;
+        }
+    }
+	```

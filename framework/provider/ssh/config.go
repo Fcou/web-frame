@@ -37,7 +37,7 @@ func WithConfigPath(configPath string) contract.SSHOption {
 		/*
 		   		    #host: localhost # ip地址
 		               #port: 3306 # 端口
-		               #username: jianfengye # 用户名
+		               #username: fcourage # 用户名
 		               #password: "123456789" # 密码
 		               #timeout: 1000
 		               #network: tcp

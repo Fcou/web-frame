@@ -2,7 +2,7 @@ connections:
     - ssh.web-01
     - ssh.web-02
 
-remote_path: "/home/jianfengye/fcou"
+remote_path: "/home/fcourage/fcou"
 
 frontend:
     pre_action:

@@ -1,8 +1,8 @@
 swagger: true
 
 path:
-#  log_folder: "/home/jianfengye/fcou/log/"
-#  runtime_folder: "/home/jianfengye/fcou/runtime/"
+#  log_folder: "/home/fcourage/fcou/log/"
+#  runtime_folder: "/home/fcourage/fcou/runtime/"
 
 dev: # 调试模式
     port: 8070 # 调试模式最终监听的端口，默认为8070

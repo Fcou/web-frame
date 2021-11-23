@@ -12,8 +12,8 @@ import (
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/Fcou/web-frame/framework/util"
+	"github.com/fcourage/collection"
 	"github.com/go-git/go-git/v5"
-	"github.com/jianfengye/collection"
 	"github.com/pkg/errors"
 
 	"github.com/Fcou/web-frame/framework/cobra"

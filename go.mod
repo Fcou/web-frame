@@ -17,7 +17,7 @@ require (
 	github.com/google/go-github/v39 v39.2.0
 	github.com/google/uuid v1.1.2
 	github.com/inconshreveable/mousetrap v1.0.0
-	github.com/jianfengye/collection v1.3.2
+	github.com/fcourage/collection v1.3.2
 	github.com/jonboulle/clockwork v0.2.2 // indirect
 	github.com/json-iterator/go v1.1.12
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0 // indirect
