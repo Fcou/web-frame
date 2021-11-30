@@ -158,7 +158,7 @@ func New() *Engine {
 			root:     true,
 		},
 		// 这里注入了contaner
-		container:              framework.NewFcouContainer(),
+		container:              framework.NewHadeContainer(),
 		FuncMap:                template.FuncMap{},
 		RedirectTrailingSlash:  true,
 		RedirectFixedPath:      false,
@@ -190,8 +190,10 @@ func Default() *Engine {
 	return engine
 }
 
+// engine创建context
 func (engine *Engine) allocateContext() *Context {
 	v := make(Params, 0, engine.maxParams)
+	// 在分配新的Context的时候，注入了container
 	return &Context{engine: engine, params: &v, container: engine.container}
 }
 

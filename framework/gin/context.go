@@ -22,6 +22,7 @@ import (
 	"github.com/Fcou/web-frame/framework"
 	"github.com/Fcou/web-frame/framework/gin/binding"
 	"github.com/Fcou/web-frame/framework/gin/render"
+
 	"github.com/gin-contrib/sse"
 )
 
@@ -47,6 +48,7 @@ const abortIndex int8 = math.MaxInt8 / 2
 type Context struct {
 	// Context中保存容器
 	container framework.Container
+
 	writermem responseWriter
 	Request   *http.Request
 	Writer    ResponseWriter

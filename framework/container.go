@@ -14,7 +14,7 @@ type Container interface {
 	// IsBind 关键字凭证是否已经绑定服务提供者
 	IsBind(key string) bool
 
-	// Make 根据关键字凭证获取一个服务
+	// Make 根据关键字凭证获取一个服务，
 	Make(key string) (interface{}, error)
 	// MustMake 根据关键字凭证获取一个服务，如果这个关键字凭证未绑定服务提供者，那么会panic。
 	// 所以在使用这个接口的时候请保证服务容器已经为这个关键字凭证绑定了服务提供者。
@@ -25,8 +25,8 @@ type Container interface {
 	MakeNew(key string, params []interface{}) (interface{}, error)
 }
 
-// FcouContainer 是服务容器的具体实现
-type FcouContainer struct {
+// HadeContainer 是服务容器的具体实现
+type HadeContainer struct {
 	Container
 	// providers 存储注册的服务提供者，key为字符串凭证
 	providers map[string]ServiceProvider
@@ -36,9 +36,9 @@ type FcouContainer struct {
 	lock sync.RWMutex
 }
 
-// NewFcouContainer 创建一个服务容器
-func NewFcouContainer() *FcouContainer {
-	return &FcouContainer{
+// NewHadeContainer 创建一个服务容器
+func NewHadeContainer() *HadeContainer {
+	return &HadeContainer{
 		providers: map[string]ServiceProvider{},
 		instances: map[string]interface{}{},
 		lock:      sync.RWMutex{},
@@ -46,7 +46,7 @@ func NewFcouContainer() *FcouContainer {
 }
 
 // PrintProviders 输出服务容器中注册的关键字
-func (fcou *FcouContainer) PrintProviders() []string {
+func (fcou *HadeContainer) PrintProviders() []string {
 	ret := []string{}
 	for _, provider := range fcou.providers {
 		name := provider.Name()
@@ -58,12 +58,12 @@ func (fcou *FcouContainer) PrintProviders() []string {
 }
 
 // Bind 将服务容器和关键字做了绑定
-func (fcou *FcouContainer) Bind(provider ServiceProvider) error {
+func (fcou *HadeContainer) Bind(provider ServiceProvider) error {
 	fcou.lock.Lock()
-	defer fcou.lock.Unlock()
 	key := provider.Name()
 
 	fcou.providers[key] = provider
+	fcou.lock.Unlock()
 
 	// if provider is not defer
 	if provider.IsDefer() == false {
@@ -73,8 +73,9 @@ func (fcou *FcouContainer) Bind(provider ServiceProvider) error {
 		// 实例化方法
 		params := provider.Params(fcou)
 		method := provider.Register(fcou)
-		instance, err := method(params...) // 相当于NewXXX()方法
+		instance, err := method(params...)
 		if err != nil {
+			fmt.Println("bind service provider ", key, " error: ", err)
 			return errors.New(err.Error())
 		}
 		fcou.instances[key] = instance
@@ -82,11 +83,11 @@ func (fcou *FcouContainer) Bind(provider ServiceProvider) error {
 	return nil
 }
 
-func (fcou *FcouContainer) IsBind(key string) bool {
+func (fcou *HadeContainer) IsBind(key string) bool {
 	return fcou.findServiceProvider(key) != nil
 }
 
-func (fcou *FcouContainer) findServiceProvider(key string) ServiceProvider {
+func (fcou *HadeContainer) findServiceProvider(key string) ServiceProvider {
 	fcou.lock.RLock()
 	defer fcou.lock.RUnlock()
 	if sp, ok := fcou.providers[key]; ok {
@@ -95,23 +96,23 @@ func (fcou *FcouContainer) findServiceProvider(key string) ServiceProvider {
 	return nil
 }
 
-func (fcou *FcouContainer) Make(key string) (interface{}, error) {
+func (fcou *HadeContainer) Make(key string) (interface{}, error) {
 	return fcou.make(key, nil, false)
 }
 
-func (fcou *FcouContainer) MustMake(key string) interface{} {
+func (fcou *HadeContainer) MustMake(key string) interface{} {
 	serv, err := fcou.make(key, nil, false)
 	if err != nil {
-		panic(err)
+		panic("container not contain key " + key)
 	}
 	return serv
 }
 
-func (fcou *FcouContainer) MakeNew(key string, params []interface{}) (interface{}, error) {
+func (fcou *HadeContainer) MakeNew(key string, params []interface{}) (interface{}, error) {
 	return fcou.make(key, params, true)
 }
 
-func (fcou *FcouContainer) newInstance(sp ServiceProvider, params []interface{}) (interface{}, error) {
+func (fcou *HadeContainer) newInstance(sp ServiceProvider, params []interface{}) (interface{}, error) {
 	// force new a
 	if err := sp.Boot(fcou); err != nil {
 		return nil, err
@@ -128,7 +129,7 @@ func (fcou *FcouContainer) newInstance(sp ServiceProvider, params []interface{})
 }
 
 // 真正的实例化一个服务
-func (fcou *FcouContainer) make(key string, params []interface{}, forceNew bool) (interface{}, error) {
+func (fcou *HadeContainer) make(key string, params []interface{}, forceNew bool) (interface{}, error) {
 	fcou.lock.RLock()
 	defer fcou.lock.RUnlock()
 	// 查询是否已经注册了这个服务提供者，如果没有注册，则返回错误
@@ -154,4 +155,14 @@ func (fcou *FcouContainer) make(key string, params []interface{}, forceNew bool)
 
 	fcou.instances[key] = inst
 	return inst, nil
+}
+
+// NameList 列出容器中所有服务提供者的字符串凭证
+func (fcou *HadeContainer) NameList() []string {
+	ret := []string{}
+	for _, provider := range fcou.providers {
+		name := provider.Name()
+		ret = append(ret, name)
+	}
+	return ret
 }

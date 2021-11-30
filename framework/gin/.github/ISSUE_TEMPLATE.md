@@ -10,6 +10,7 @@
 ## How to reproduce
 
 <!-- The smallest possible code example to show the problem that can be compiled, like -->
+
 ```
 package main
 
@@ -29,6 +30,7 @@ func main() {
 ## Expectations
 
 <!-- Your expectation result of 'curl' command, like -->
+
 ```
 $ curl http://localhost:8201/hello/world
 Hello world
@@ -37,6 +39,7 @@ Hello world
 ## Actual result
 
 <!-- Actual result showing the problem -->
+
 ```
 $ curl -i http://localhost:8201/hello/world
 <YOUR RESULT>
